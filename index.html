@@ -122,11 +122,28 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script>
+    // Show visible error if React/Babel fails to load
+    window.addEventListener('error', function(e) {
+      var loading = document.getElementById('loading-screen');
+      if (loading) {
+        loading.innerHTML = '<div style="color:#dc2626;font-size:14px;max-width:500px;text-align:center;padding:2rem">' +
+          '<div style="font-size:32px;margin-bottom:12px">⚠️</div>' +
+          '<strong>Failed to load</strong><br/><br/>' +
+          '<code style="background:#f1f5f9;padding:4px 8px;border-radius:4px;font-size:12px;word-break:break-all">' + 
+          (e.message || 'Unknown error') + '</code><br/><br/>' +
+          '<span style="color:#64748b;font-size:12px">Check your browser console for details.<br/>' +
+          'Try opening in Chrome or Edge. Ensure you have internet access.</span>' +
+          '</div>';
+      }
+    });
+  </script>
 
-  <script type="text/babel">
+  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.7/babel.min.js"></script>
+
+  <script type="text/babel" data-presets="react" data-plugins="transform-class-properties">
     const { useState, useEffect, useMemo, Component } = React;
 
     // ═══════════════════════════════════════════════════════════════
@@ -1595,6 +1612,8 @@
       );
     }
 
+    var loadingEl = document.getElementById('loading-screen');
+    if (loadingEl) loadingEl.style.display = 'none';
     ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
