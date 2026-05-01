@@ -1,20 +1,1601 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zuper Catalog Import</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <style>
-      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-      html, body, #root { height: 100%; }
-      body { background: #f0f2f7; font-family: 'DM Sans', system-ui, sans-serif; }
-    </style>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zuper Catalog Import</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #f0f2f7;
+      --bg-2:      #ffffff;
+      --bg-3:      #f5f6fa;
+      --bg-4:      #eceef4;
+      --border:    rgba(0,0,0,0.08);
+      --border-2:  rgba(0,0,0,0.14);
+      --border-3:  rgba(0,0,0,0.22);
+      --text:      #0f1117;
+      --text-2:    #4b5368;
+      --text-3:    #8891a8;
+      --accent:        #4f58f0;
+      --accent-2:      #3a42d6;
+      --accent-light:  #eef0ff;
+      --accent-border: rgba(79,88,240,0.3);
+      --green:        #059669;
+      --green-bg:     #ecfdf5;
+      --green-border: rgba(5,150,105,0.25);
+      --amber:        #d97706;
+      --amber-bg:     #fffbeb;
+      --amber-border: rgba(217,119,6,0.25);
+      --red:          #dc2626;
+      --red-bg:       #fef2f2;
+      --red-border:   rgba(220,38,38,0.25);
+      --blue:         #2563eb;
+      --blue-bg:      #eff6ff;
+      --blue-border:  rgba(37,99,235,0.25);
+      --font: 'DM Sans', system-ui, -apple-system, sans-serif;
+      --mono: 'DM Mono', 'Fira Code', ui-monospace, monospace;
+      --radius:    8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow:    0 4px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.05);
+    }
+    html, body, #root { height: 100%; }
+    body { font-family: var(--font); font-size: 14px; line-height: 1.5; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--border-3); }
+    .app { display: flex; flex-direction: column; min-height: 100vh; }
+    .header { position: sticky; top: 0; z-index: 100; height: 58px; background: #ffffff; border-bottom: 1px solid var(--border); box-shadow: var(--shadow-sm); padding: 0 1.5rem; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .header-logo { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+    .header-logo-mark { width: 32px; height: 32px; border-radius: 8px; background: var(--accent); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; font-family: var(--mono); flex-shrink: 0; }
+    .header-company { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); font-weight: 400; }
+    .stepper { display: flex; align-items: center; }
+    .step-btn { display: flex; align-items: center; gap: 6px; padding: 0 12px; height: 58px; background: none; border: none; border-bottom: 2.5px solid transparent; font-family: var(--font); font-size: 12px; font-weight: 500; color: var(--text-3); cursor: default; transition: all 0.18s; white-space: nowrap; }
+    .step-btn.done { color: var(--text-2); cursor: pointer; }
+    .step-btn.done:hover { color: var(--accent); }
+    .step-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .step-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; background: var(--bg-3); border: 1.5px solid var(--border-2); color: var(--text-3); transition: all 0.18s; }
+    .step-num.active { background: var(--accent-light); border-color: var(--accent-border); color: var(--accent); }
+    .step-num.done { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .page { flex: 1; max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; width: 100%; }
+    .page-narrow { max-width: 520px; margin: 3rem auto; padding: 0 1.5rem; }
+    .card { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm); }
+    .card-sm { padding: 0.875rem 1rem; }
+    .input { width: 100%; padding: 9px 13px; background: var(--bg-2); border: 1.5px solid var(--border-2); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 13px; outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+    .input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .input::placeholder { color: var(--text-3); }
+    .select { padding: 8px 10px; background: var(--bg-2); border: 1.5px solid var(--border-2); border-radius: var(--radius); color: var(--text); font-family: var(--font); font-size: 12px; outline: none; cursor: pointer; width: 100%; transition: border-color 0.15s; }
+    .select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .btn { padding: 9px 20px; border-radius: var(--radius); border: none; cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 500; transition: all 0.15s; white-space: nowrap; line-height: 1; }
+    .btn-primary { background: var(--accent); color: #fff; box-shadow: 0 1px 3px rgba(79,88,240,0.25); }
+    .btn-primary:hover { background: var(--accent-2); box-shadow: 0 2px 6px rgba(79,88,240,0.35); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; box-shadow: none; }
+    .btn-outline { background: var(--bg-2); color: var(--text-2); border: 1.5px solid var(--border-2); }
+    .btn-outline:hover { border-color: var(--border-3); color: var(--text); background: var(--bg-3); }
+    .btn-outline:active { transform: scale(0.98); }
+    .btn-sm { padding: 6px 14px; font-size: 12px; }
+    .btn-xs { padding: 4px 10px; font-size: 11px; }
+    .badge { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; border-radius: 5px; font-size: 11px; font-weight: 600; white-space: nowrap; line-height: 1.4; }
+    .badge-green  { background: var(--green-bg);  color: var(--green);  border: 1px solid var(--green-border); }
+    .badge-amber  { background: var(--amber-bg);  color: var(--amber);  border: 1px solid var(--amber-border); }
+    .badge-blue   { background: var(--blue-bg);   color: var(--blue);   border: 1px solid var(--blue-border); }
+    .badge-red    { background: var(--red-bg);    color: var(--red);    border: 1px solid var(--red-border); }
+    .badge-accent { background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border); }
+    .badge-gray   { background: var(--bg-4); color: var(--text-2); border: 1px solid var(--border-2); }
+    .pill { padding: 6px 14px; border-radius: 20px; font-family: var(--font); font-size: 12px; font-weight: 500; border: 1.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+    .pill:hover { border-color: var(--border-3); color: var(--text); background: var(--bg-3); }
+    .pill.active { border-color: var(--accent); background: var(--accent-light); color: var(--accent); }
+    .table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .table th { text-align: left; padding: 9px 12px; background: var(--bg-3); border-bottom: 1.5px solid var(--border-2); font-size: 11px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.05em; }
+    .table th:first-child { border-radius: var(--radius) 0 0 0; }
+    .table th:last-child { border-radius: 0 var(--radius) 0 0; }
+    .table td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); }
+    .table tr:last-child td { border-bottom: none; }
+    .table tr:hover td { background: var(--bg-3); }
+    .section-header { font-size: 11px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.07em; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 1.5px solid var(--border); display: block; }
+    .tag { display: inline-flex; padding: 2px 7px; border-radius: 4px; font-size: 10px; font-family: var(--mono); font-weight: 500; background: var(--bg-3); color: var(--text-2); border: 1px solid var(--border-2); }
+    .token-chip { display: inline-flex; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; background: var(--accent-light); color: var(--accent); border: 1px solid var(--accent-border); }
+    .progress-bar { height: 6px; background: var(--bg-4); border-radius: 3px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); border-radius: 3px; transition: width 0.4s ease; }
+    .stat { background: var(--bg-3); border-radius: var(--radius); padding: 14px 16px; border: 1px solid var(--border); }
+    .stat-value { font-size: 26px; font-weight: 700; color: var(--accent); letter-spacing: -0.03em; }
+    .stat-label { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+    .label { display: block; font-size: 11px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+    .mono { font-family: var(--mono); font-size: 11px; color: var(--text-2); word-break: break-all; line-height: 1.5; }
+    .divider { border: none; border-top: 1px solid var(--border); margin: 1rem 0; }
+    @keyframes shimmer { 0%,100%{ opacity:.4 } 50%{ opacity:.9 } }
+    .shimmer { animation: shimmer 1.3s ease-in-out infinite; }
+    #loading-screen { display:flex; align-items:center; justify-content:center; height:100vh; font-family:sans-serif; color:#8891a8; font-size:14px; flex-direction:column; gap:10px; }
+    .loading-dot { width:8px; height:8px; border-radius:50%; background:#4f58f0; display:inline-block; animation:shimmer 1s ease-in-out infinite; }
+  </style>
+</head>
+<body>
+  <div id="root">
+    <div id="loading-screen">
+      <div style="width:36px;height:36px;border-radius:9px;background:#4f58f0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;font-family:monospace;margin-bottom:6px">Z</div>
+      <span>Loading Zuper Catalog Import…</span>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, Component } = React;
+
+    // ═══════════════════════════════════════════════════════════════
+    // MASTER DATA
+    // ═══════════════════════════════════════════════════════════════
+
+    const SUPABASE_URL  = 'https://kbdczzldmyayliwajwma.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtiZGN6emxkbXlheWxpd2Fqd21hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NTcxNjQsImV4cCI6MjA5MzEzMzE2NH0.6EoEymO0rqSL-BLZkkW9X4sdyjJNhluis3eNSAH1nGM';
+
+    const MASTER_TOKENS = [
+      { name: 'Total Roof Area',               category: 'Roof Measurements',  uom: 'SQFT' },
+      { name: 'Total Ridges Length',            category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Valleys Length',           category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Rakes Length',             category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Eaves Length',             category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Hip Length',               category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Step Flashing Length',     category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Roof Facets Area',         category: 'Roof Measurements',  uom: 'SQFT' },
+      { name: 'Total Roof Area (in squares)',   category: 'Roof Measurements',  uom: 'SQ'   },
+      { name: 'Headwall Flashing',              category: 'Roof Measurements',  uom: 'LF'   },
+      { name: 'Total Siding Area',              category: 'Siding Measurements', uom: 'SQFT' },
+      { name: 'Gutter Length',                  category: 'Gutters',            uom: 'LF'   },
+      { name: 'No of Downspouts',               category: 'Gutters',            uom: 'EA'   },
+      { name: 'No of End Caps',                 category: 'Gutters',            uom: 'EA'   },
+      { name: 'No of Outside Miters',           category: 'Gutters',            uom: 'EA'   },
+      { name: 'No of Inside Miters',            category: 'Gutters',            uom: 'EA'   },
+      { name: 'Downspout Elbows',               category: 'Gutters',            uom: 'EA'   },
+      { name: 'No of Inner Elbows',             category: 'Gutters',            uom: 'EA'   },
+      { name: 'No of Outer Elbows',             category: 'Gutters',            uom: 'EA'   },
+      { name: 'Suggested Waste Percentage %',   category: 'Roof Waste Factors', uom: '%'    },
+      { name: 'Waste Factor %',                 category: 'Roof Waste Factors', uom: '%'    },
+      { name: 'No of Vents',                    category: 'Ventilation',        uom: 'EA'   },
+      { name: 'LF of Eave Intake Vents Needed', category: 'Ventilation',        uom: 'LF'   },
+    ];
+
+    const PROPOSAL_LINE_ITEMS = [
+      { name:'Shingles', srs_category:'SHINGLES', output_uom:'SQ', formula_expr:'(Total Roof Area * (1 + Suggested Waste Percentage % / 100)) / 100', tokens_used:['Total Roof Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Shingles (squares)', expression:'(Total Roof Area * (1 + Suggested Waste Percentage % / 100)) / 100', key:'shingles_sq', category:'AREA_MEASUREMENT', description:'Standard shingle quantity in squares' },{ name:'Shingles for Roof', expression:'((Total Roof Area *(1+Suggested Waste Percentage % /100)))/33', key:'Roof_Shingles', category:'AREA_MEASUREMENT', description:'Shingles in bundles (33 SQ/bundle)' },{ name:'Starter Shingles (bundles)', expression:'(Total Eaves Length + Total Rakes Length) / 120', key:'starter_shingles_bundles', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Hip & Ridge Cap', srs_category:'HIP AND RIDGE', output_uom:'BD', formula_expr:'CEIL((Total Hip Length + Total Ridges Length) / 33)', tokens_used:['Total Hip Length','Total Ridges Length'], relevant_formulas:[{ name:'Hip & Ridge Cap Shingles (bundles)', expression:'(Total Hip Length + Total Ridges Length) / 33', key:'hip_ridge_cap_shingles_bundles', category:'AREA_MEASUREMENT', description:'' },{ name:'Hip & Ridge Cap - Metal', expression:'((Total Ridges Length + Total Hip Length) * (1 + Suggested Waste Percentage % / 100)) / 10', key:'Ridge_cap_metal', category:'AREA_MEASUREMENT', description:'Metal hip/ridge pieces' },{ name:'Ridge Cap & Starter Strip', expression:'(Total Hip Length + Total Ridges Length) / 33', key:'ridge_cap_starter', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Starter Strip', srs_category:'STARTER', output_uom:'BD', formula_expr:'CEIL((Total Eaves Length + Total Rakes Length) / 120)', tokens_used:['Total Eaves Length','Total Rakes Length'], relevant_formulas:[{ name:'Starter Strip', expression:'((Total Rakes Length + Total Eaves Length + LF of Eave Intake Vents Needed) * (1 + (Suggested Waste Percentage % / 100))) / 105', key:'SS-9009', category:'AREA_MEASUREMENT', description:'Includes eave intake vent LF' },{ name:'Starter (bundles)', expression:'(Total Eaves Length + Total Rakes Length) / 120', key:'starter_bundles', category:'AREA_MEASUREMENT', description:'Simple bundle count' }] },
+      { name:'Underlayment — Synthetic', srs_category:'UNDERLAYMENT', output_uom:'RL', formula_expr:'CEIL(Total Roof Area * (1 + Suggested Waste Percentage % / 100) / 1000)', tokens_used:['Total Roof Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Synthetic Underlayment (rolls)', expression:'Total Roof Facets Area / 1000', key:'synthetic_underlayment_rolls', category:'AREA_MEASUREMENT', description:'' },{ name:'Synthetic Underlayment', expression:'(Total Roof Area * (1 + Suggested Waste Percentage % / 100)) / 1000', key:'synth_und_waste', category:'AREA_MEASUREMENT', description:'Includes waste factor' }] },
+      { name:'Underlayment — Felt 15#', srs_category:'UNDERLAYMENT', output_uom:'RL', formula_expr:'CEIL(Total Roof Area * (1 + Suggested Waste Percentage % / 100) / 400)', tokens_used:['Total Roof Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Felt 15# Underlayment (rolls)', expression:'(Total Roof Area * (1 + Suggested Waste Percentage % / 100)) / 400', key:'felt15_rolls', category:'AREA_MEASUREMENT', description:'400 SQFT per roll' },{ name:'FeltBuster Underlayment — Rolls', expression:'Total Roof Area (in squares) * (1 + Suggested Waste Percentage % / 100) / 10', key:'feltbuster_rolls', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Underlayment — Felt 30#', srs_category:'UNDERLAYMENT', output_uom:'RL', formula_expr:'CEIL(Total Roof Area * (1 + Suggested Waste Percentage % / 100) / 200)', tokens_used:['Total Roof Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Felt 30# Underlayment (rolls)', expression:'(Total Roof Area * (1 + Suggested Waste Percentage % / 100)) / 200', key:'felt30_rolls', category:'AREA_MEASUREMENT', description:'200 SQFT per roll' }] },
+      { name:'Underlayment — Self-Adhered HT', srs_category:'UNDERLAYMENT', output_uom:'RL', formula_expr:'CEIL(Total Roof Area * (1 + Suggested Waste Percentage % / 100) / 200)', tokens_used:['Total Roof Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Self-Adhered Underlayment (rolls)', expression:'(Total Roof Area * (1 + Suggested Waste Percentage % / 100)) / 200', key:'sa_und_rolls', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Ice & Water — Standard', srs_category:'ICE AND WATER', output_uom:'RL', formula_expr:'CEIL((Total Eaves Length + Total Valleys Length) * 1.1 / 66)', tokens_used:['Total Eaves Length','Total Valleys Length'], relevant_formulas:[{ name:'Ice and Water Shield (rolls)', expression:'((Total Eaves Length + Total Valleys Length) * 1.1) / 66', key:'ice_and_water_shield_rolls', category:'AREA_MEASUREMENT', description:'' },{ name:'Ice & Water (rolls)', expression:'((Total Eaves Length + Total Valleys Length) * 1.1) / 66', key:'ice_water_rolls', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Drip Edge', srs_category:'DRIP EDGE', output_uom:'PC', formula_expr:'CEIL((Total Rakes Length + Total Eaves Length) / 10)', tokens_used:['Total Rakes Length','Total Eaves Length'], relevant_formulas:[{ name:'Drip Edge (pieces)', expression:'(Total Rakes Length + Total Eaves Length) / 10', key:'drip_edge_pieces', category:'AREA_MEASUREMENT', description:'10 LF per piece' },{ name:'Drip Edge (LF)', expression:'Total Rakes Length + Total Eaves Length', key:'drip_edge_lf', category:'AREA_MEASUREMENT', description:'Linear feet' }] },
+      { name:'W-Valley', srs_category:'W-VALLEY', output_uom:'PC', formula_expr:'CEIL(Total Valleys Length / 10)', tokens_used:['Total Valleys Length'], relevant_formulas:[{ name:'Valley Metal (pieces)', expression:'Total Valleys Length / 10', key:'valley_metal_pieces', category:'AREA_MEASUREMENT', description:'' },{ name:'W-Valley (pieces)', expression:'Total Valleys Length / 10', key:'w_valley_pieces', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Gutter Apron', srs_category:'GUTTER APRON', output_uom:'PC', formula_expr:'CEIL((Total Rakes Length + Total Eaves Length) / 10)', tokens_used:['Total Rakes Length','Total Eaves Length'], relevant_formulas:[{ name:'Gutter Apron (pieces)', expression:'(Total Rakes Length + Total Eaves Length) / 10', key:'gutter_apron_pieces', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Coil Nails', srs_category:'COIL NAILS', output_uom:'BX', formula_expr:'CEIL(Total Roof Area * 3.2 / 3600)', tokens_used:['Total Roof Area'], relevant_formulas:[{ name:'Coil Nails (boxes)', expression:'Total Roof Area * 3.2 / 3600', key:'coil_nails_boxes', category:'AREA_MEASUREMENT', description:'3,600 nails per box' }] },
+      { name:'Plastic Cap Nails', srs_category:'PLASTIC CAPS', output_uom:'BX', formula_expr:'CEIL(Total Roof Area / 400)', tokens_used:['Total Roof Area'], relevant_formulas:[{ name:'Plastic Cap Nails (boxes)', expression:'Total Roof Area / 400', key:'plastic_cap_nails', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Ridge Vent', srs_category:'VENTS', output_uom:'PC', formula_expr:'CEIL(Total Ridges Length / 4)', tokens_used:['Total Ridges Length'], relevant_formulas:[{ name:'Ridge Vents (bundles)', expression:'Total Ridges Length / 4', key:'ridge_vents_bundles', category:'AREA_MEASUREMENT', description:'4 LF per piece' },{ name:'Ridge Vent (LF)', expression:'Total Ridges Length', key:'ridge_vent_lf', category:'AREA_MEASUREMENT', description:'Linear feet of ridge vent' }] },
+      { name:'Box Vent', srs_category:'VENTS', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[{ name:'Box Vents (ea)', expression:'No of Vents', key:'box_vents_ea', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Power Vent / Attic Fan', srs_category:'VENTS', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Soffit Vent', srs_category:'VENTS', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Pipe Boot 2"', srs_category:'PIPE FLASHING', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Pipe Boot 3"', srs_category:'PIPE FLASHING', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Pipe Boot 4"', srs_category:'PIPE FLASHING', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Step Flashing', srs_category:'OTHER FLASHING METAL', output_uom:'PC', formula_expr:'CEIL(Total Step Flashing Length / 10)', tokens_used:['Total Step Flashing Length'], relevant_formulas:[{ name:'Step Flashing (pieces)', expression:'Total Step Flashing Length / 10', key:'step_flashing_pieces', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Counter / Headwall Flashing', srs_category:'OTHER FLASHING METAL', output_uom:'PC', formula_expr:'CEIL(Headwall Flashing / 10)', tokens_used:['Headwall Flashing'], relevant_formulas:[{ name:'Counter Flashing (pieces)', expression:'Headwall Flashing / 10', key:'counter_flashing_pieces', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Chimney Flashing Kit', srs_category:'OTHER FLASHING METAL', output_uom:'EA', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Caulk / Sealant', srs_category:'CAULK', output_uom:'TB', formula_expr:null, tokens_used:[], relevant_formulas:[] },
+      { name:'Gutter Sections', srs_category:'GUTTER/ALUMINUM/COIL', output_uom:'PC', formula_expr:'CEIL(Gutter Length / 10)', tokens_used:['Gutter Length'], relevant_formulas:[{ name:'Gutters (pieces)', expression:'Gutter Length / 10', key:'gutters_pieces', category:'AREA_MEASUREMENT', description:'' },{ name:'Gutter (LF)', expression:'Gutter Length', key:'gutter_lf', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Downspouts', srs_category:'GUTTER/ALUMINUM/COIL', output_uom:'EA', formula_expr:'No of Downspouts', tokens_used:['No of Downspouts'], relevant_formulas:[{ name:'Downspouts (ea)', expression:'No of Downspouts', key:'downspouts_ea', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Gutter End Caps', srs_category:'GUTTER/ALUMINUM/COIL', output_uom:'EA', formula_expr:'No of End Caps', tokens_used:['No of End Caps'], relevant_formulas:[{ name:'Gutter End Caps (ea)', expression:'No of End Caps', key:'end_caps_ea', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Gutter Elbows', srs_category:'GUTTER/ALUMINUM/COIL', output_uom:'EA', formula_expr:'Downspout Elbows + No of Inner Elbows + No of Outer Elbows', tokens_used:['Downspout Elbows','No of Inner Elbows','No of Outer Elbows'], relevant_formulas:[{ name:'Gutter Elbows (ea)', expression:'Downspout Elbows + No of Inner Elbows + No of Outer Elbows', key:'gutter_elbows_ea', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Siding', srs_category:'SIDING', output_uom:'SQ', formula_expr:'CEIL(Total Siding Area * (1 + Suggested Waste Percentage % / 100) / 100)', tokens_used:['Total Siding Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Siding (squares)', expression:'(Total Siding Area * (1 + Suggested Waste Percentage % / 100)) / 100', key:'siding_squares', category:'AREA_MEASUREMENT', description:'' }] },
+      { name:'Roof Decking (OSB)', srs_category:'DECKING', output_uom:'PC', formula_expr:'CEIL(Total Roof Area / 32 * (1 + Suggested Waste Percentage % / 100))', tokens_used:['Total Roof Area','Suggested Waste Percentage %'], relevant_formulas:[{ name:'Decking (sheets)', expression:'Total Roof Area / 32 * (1 + Suggested Waste Percentage % / 100)', key:'decking_sheets', category:'AREA_MEASUREMENT', description:'4x8 sheet = 32 SQFT' }] },
+    ];
+
+    const ALL_BRANDS = [
+      'Gaf','Owens Corning','Certainteed','Atlas','Tamko','Iko','Malarkey',
+      'Boral','Eagle','Davinci Roofscapes','Decra','F-wave','Pabco','Cedur',
+      'Edco','Tilcor','Brava Roof Tile','Tesla','Ecostar','Inspire','Alside',
+      'Azek','Alsco','Klauer Manufacturing','Foundry','Diamond Ridge','Everlast',
+      'Provia','Stoneworth','Topshield','Boral Steel',
+    ];
+
+    const BIG3 = ['Gaf','Owens Corning','Certainteed'];
+
+    // ═══════════════════════════════════════════════════════════════
+    // API CLIENT
+    // ═══════════════════════════════════════════════════════════════
+
+    const UOM_MAP = {
+      SQFT:'sq_ft', sqft:'sq_ft', 'sq ft':'sq_ft', 'sq_ft':'sq_ft',
+      SQ:'sq', sq:'sq',
+      LF:'lf', lf:'lf', 'lin ft':'lf', 'linear ft':'lf',
+      '%':'pct', PERCENT:'pct', pct:'pct',
+      EA:'ea', ea:'ea', EACH:'ea',
+      PC:'pc', pc:'pc', PCS:'pc',
+      BX:'bx', bx:'bx', BOX:'bx',
+      RL:'rl', rl:'rl', ROLL:'rl',
+      BD:'bd', bd:'bd', BUNDLE:'bd',
+      TB:'tb', tb:'tb',
+      UNIT:'unit', unit:'unit', '':'unit',
+    };
+
+    function normaliseUom(raw) {
+      const k  = String(raw || '').trim().toUpperCase().replace(/\s+/g,' ');
+      const kl = String(raw || '').trim().toLowerCase();
+      return UOM_MAP[k] || UOM_MAP[kl] || UOM_MAP[raw] || String(raw || 'unit').toLowerCase();
+    }
+
+    /**
+     * createZuperClient
+     * @param {string} region  - e.g. 'us-east-1'
+     * @param {string} apiKey
+     * @param {string} [proxyBase] - optional Netlify deploy URL, e.g. 'https://my-app.netlify.app'
+     *   If provided, calls proxyBase + /api/zuper/{region}/...
+     *   If omitted, calls Zuper directly at https://{region}.zuperpro.com/api
+     */
+    function createZuperClient(region, apiKey, proxyBase) {
+      const base = proxyBase
+        ? `${proxyBase.replace(/\/$/, '')}/api/zuper/${region}`
+        : `https://${region}.zuperpro.com/api`;
+
+      async function request(method, path, body) {
+        const opts = {
+          method,
+          headers: { accept:'application/json','content-type':'application/json','x-api-key':apiKey },
+        };
+        if (body !== undefined) opts.body = JSON.stringify(body);
+        let res;
+        try { res = await fetch(`${base}${path}`, opts); }
+        catch (e) {
+          if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
+            throw new Error(`Network/CORS error — if calling Zuper directly fails due to CORS, enter your Netlify proxy URL in Advanced Settings. (${e.message})`);
+          }
+          throw new Error(`Network: ${e.message}`);
+        }
+        const text = await res.text();
+        if (!res.ok) {
+          let detail = text;
+          try { detail = JSON.stringify(JSON.parse(text)); } catch {}
+          throw new Error(`${res.status} ${detail.substring(0,400)}`);
+        }
+        try { return JSON.parse(text); } catch { return { raw: text }; }
+      }
+
+      function safeArray(res, ...keys) {
+        for (const k of keys) { if (Array.isArray(res?.[k])) return res[k]; }
+        return Array.isArray(res) ? res : [];
+      }
+
+      async function createTokenWithFallback(categoryUid, tokenName, rawUom) {
+        const uom = normaliseUom(rawUom);
+        const endpoint = `/measurements/categories/${categoryUid}/tokens`;
+        const bodies = [
+          { measurement_token_name: tokenName, uom },
+          { measurement_token_name: tokenName, measurement_uom: uom },
+          { token_name: tokenName, uom },
+          { token_name: tokenName, token_uom: uom },
+          { measurement_token: tokenName, measurement_uom: uom },
+          { measurement_token: tokenName, uom },
+          { name: tokenName, uom },
+          { label: tokenName, uom },
+          { request_data: { measurement_token_name: tokenName, uom } },
+          { request_data: { token_name: tokenName, uom } },
+          { request_data: { measurement_token_name: tokenName, measurement_uom: uom } },
+          { measurement_token_name:tokenName, measurement_token:tokenName, token_name:tokenName, name:tokenName, label:tokenName, uom, measurement_uom:uom, token_uom:uom },
+        ];
+        const allAttempts = [];
+        for (const body of bodies) {
+          try {
+            const result = await request('POST', endpoint, body);
+            if (result?.type === 'error') { allAttempts.push({ body, error: result?.message || 'API error type' }); continue; }
+            return { result, winningBody: body, allAttempts };
+          } catch (e) {
+            allAttempts.push({ body, error: e.message });
+            if (String(e.message).startsWith('404')) break;
+          }
+        }
+        const summary = allAttempts.map((a,i) => `[${i+1}] ${JSON.stringify(a.body).substring(0,60)}: ${a.error?.substring(0,80)}`).join('\n');
+        throw new Error(`All ${allAttempts.length} payload shapes failed:\n${summary}`);
+      }
+
+      return {
+        get:  (path)       => request('GET',  path),
+        post: (path, body) => request('POST', path, body),
+        put:  (path, body) => request('PUT',  path, body),
+
+        getCompany: () => request('GET', '/user/company'),
+
+        getAllProductCategories: async () => {
+          const all = [];
+          for (let page = 1; page <= 20; page++) {
+            let res;
+            try { res = await request('GET', `/products/category?count=100&page=${page}&filter.keyword=`); }
+            catch { break; }
+            const items = safeArray(res, 'data', 'categories');
+            if (!items.length) break;
+            all.push(...items);
+            if (items.length < 100) break;
+          }
+          return all;
+        },
+
+        getMeasurementCategories: () =>
+          request('GET', '/measurements/categories?sort=ASC&sort_by=created_at'),
+
+        createMeasurementCategory: (name) =>
+          request('POST', '/measurements/categories', { category_name: name, category_description: name }),
+
+        createMeasurementToken: (categoryUid, tokenName, rawUom) =>
+          createTokenWithFallback(categoryUid, tokenName, rawUom),
+
+        createFormula: (payload) => request('POST', '/formulas', payload),
+
+        getLocations: async () => {
+          for (const path of ['/location','/locations']) {
+            try {
+              const res = await request('GET', path);
+              const items = safeArray(res, 'data', 'locations');
+              if (Array.isArray(res?.data) || Array.isArray(res)) return items;
+            } catch {}
+          }
+          return [];
+        },
+
+        createLocation: async (name = 'Warehouse') => {
+          const payloads = [
+            { location_name:name, location_type:'WAREHOUSE', location_address:{ street:'123 Main St', city:'New York', state:'NY', zip:'10001', country:'US' } },
+            { location_name:name, location_type:'WAREHOUSE' },
+            { name, type:'WAREHOUSE' },
+            { name, location_type:'WAREHOUSE' },
+            { location_name:name },
+          ];
+          for (const body of payloads) {
+            for (const ep of ['/location','/locations']) {
+              try {
+                const res = await request('POST', ep, body);
+                if (res?.type !== 'error') return res;
+              } catch (e) { if (String(e.message).startsWith('404')) break; }
+            }
+          }
+          throw new Error('Cannot create location automatically — please add one in Zuper → Settings → Locations → Add Location, then reload.');
+        },
+
+        getProducts: async () => {
+          const res = await request('GET', '/product').catch(() => ({ data: [] }));
+          return safeArray(res, 'data', 'products');
+        },
+        createProduct: (payload) => request('POST', '/product', payload),
+        linkFormulaToProduct: (productId, formulaUid) =>
+          request('PUT', `/product/${productId}/formula`, { formula_uid: formulaUid }),
+      };
+    }
+
+    async function getOrCreateWarehouse(client) {
+      const locs = await client.getLocations();
+      const best = locs.find(l => {
+        const t = String(l.location_type || l.type || '').toUpperCase();
+        const n = String(l.location_name || l.name || '').toLowerCase();
+        return t === 'WAREHOUSE' || n.includes('warehouse') || n.includes('main') || n.includes('default');
+      }) || locs[0];
+
+      if (best) return {
+        uid:  String(best.location_uid || best.uid || best.id || best.location_id || ''),
+        name: String(best.location_name || best.name || 'Warehouse'),
+      };
+
+      try {
+        const res = await client.createLocation('Warehouse');
+        return {
+          uid:  String(res?.data?.location_uid || res?.data?.uid || res?.data?.id || res?.uid || ''),
+          name: 'Warehouse',
+        };
+      } catch (e) { throw new Error(e.message); }
+    }
+
+    function parseExistingTokens(categories) {
+      const map = {};
+      (Array.isArray(categories) ? categories : []).forEach(cat => {
+        const catUid  = String(cat.measurement_category_uid || cat.category_uid || cat.uid || cat.id || '');
+        const catName = String(cat.measurement_category_name || cat.category_name || cat.name || '');
+        const tokenList = cat.tokens || cat.measurement_tokens || cat.data || cat.items || [];
+        (Array.isArray(tokenList) ? tokenList : []).forEach(t => {
+          if (!t) return;
+          const tName = String(t.measurement_token_name || t.measurement_token || t.token_name || t.name || t.label || '');
+          const tUid  = String(t.measurement_token_uid  || t.token_uid || t.uid || t.id || '');
+          if (!tName) return;
+          map[tName.toLowerCase()] = { token_uid:tUid, category_uid:catUid, category_name:catName, name:tName, uom:String(t.uom || t.measurement_uom || '') };
+        });
+      });
+      return map;
+    }
+
+    const supaHeaders = {
+      apikey:         SUPABASE_ANON,
+      Authorization:  `Bearer ${SUPABASE_ANON}`,
+      'Content-Type': 'application/json',
+    };
+
+    async function fetchProductsByBrand(brandNorm) {
+      const url = `${SUPABASE_URL}/rest/v1/srs_products`
+        + `?manufacturer_norm=ilike.${encodeURIComponent(brandNorm)}`
+        + `&select=product_id,product_name,product_category,manufacturer,manufacturer_norm,`
+        + `suggested_price,proposal_line_item,family_tier,primary_item`
+        + `&limit=500`;
+      const res = await fetch(url, { headers: supaHeaders });
+      if (!res.ok) throw new Error(`Supabase ${res.status}`);
+      const data = await res.json();
+      return Array.isArray(data) ? data : [];
+    }
+
+    function buildExpressionMap(expression, tokenUidMap) {
+      if (!expression) return { expression:'', expression_map:[] };
+      let expr = expression;
+      const map = [];
+      let i = 1;
+      const tokens = Object.keys(tokenUidMap || {}).sort((a,b) => b.length - a.length);
+      for (const tokenName of tokens) {
+        if (expr.includes(tokenName)) {
+          const key = `$${i}`;
+          const { token_uid, category_uid } = tokenUidMap[tokenName] || {};
+          map.push({ key, type:'MEASUREMENT', field_name:tokenName, measurement_token_uid:token_uid||'', measurement_category_uid:category_uid||'' });
+          expr = expr.split(tokenName).join(key);
+          i++;
+        }
+      }
+      expr = expr.replace(/CEIL\((.+?)\)/g, '$1').trim();
+      return { expression:expr, expression_map:map };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 1 — CONNECT
+    // ═══════════════════════════════════════════════════════════════
+
+    const REGIONS = ['us-east-1','us-west-1c','ap-southeast-2'];
+
+    function StepConnect({ onNext }) {
+      const [region,    setRegion]    = useState('us-east-1');
+      const [apiKey,    setApiKey]    = useState('');
+      const [proxyBase, setProxyBase] = useState('');
+      const [showAdv,   setShowAdv]   = useState(false);
+      const [loading,   setLoading]   = useState(false);
+      const [company,   setCompany]   = useState(null);
+      const [error,     setError]     = useState('');
+
+      async function connect() {
+        if (!apiKey.trim()) { setError('API key is required'); return; }
+        setLoading(true); setError(''); setCompany(null);
+        try {
+          const client = createZuperClient(region, apiKey.trim(), proxyBase.trim() || undefined);
+          const res = await client.getCompany();
+          const name = res?.data?.company_name || res?.company_name || res?.data?.name || res?.name || null;
+          const id   = res?.data?.company_id   || res?.company_id   || res?.data?.id   || res?.id   || '—';
+          if (!name) { setError(`Connected but couldn't read company name. Raw: ${JSON.stringify(res).substring(0,120)}`); setLoading(false); return; }
+          setCompany({ name, id, region, apiKey: apiKey.trim(), proxyBase: proxyBase.trim() || null });
+        } catch (e) { setError(e.message); }
+        setLoading(false);
+      }
+
+      const apiBase = proxyBase.trim()
+        ? `${proxyBase.trim().replace(/\/$/,'')}/api/zuper/${region}/user/company`
+        : `https://${region}.zuperpro.com/api/user/company`;
+
+      return (
+        <div className="page-narrow">
+          <div style={{ textAlign:'center', marginBottom:'2.5rem' }}>
+            <div style={{ width:60, height:60, margin:'0 auto 1rem', background:'var(--accent-light)', border:'2px solid var(--accent-border)', borderRadius:16, display:'flex', alignItems:'center', justifyContent:'center', fontSize:26 }}>⚡</div>
+            <h1 style={{ fontSize:24, fontWeight:700, letterSpacing:'-0.02em', marginBottom:6, color:'var(--text)' }}>Connect to Zuper</h1>
+            <p style={{ fontSize:14, color:'var(--text-2)', lineHeight:1.6 }}>Select your data center region and enter your API key to begin the catalog import.</p>
+          </div>
+
+          <div className="card" style={{ padding:'1.75rem' }}>
+            <div style={{ display:'flex', flexDirection:'column', gap:20 }}>
+              <div>
+                <span className="label">Data center region</span>
+                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:8 }}>
+                  {REGIONS.map(r => (
+                    <button key={r} className={`pill${region===r?' active':''}`}
+                      style={{ borderRadius:8, textAlign:'center', padding:'10px 6px', fontSize:12, width:'100%' }}
+                      onClick={() => setRegion(r)}>{r}</button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <span className="label">API key</span>
+                <input className="input" type="password" placeholder="Paste your x-api-key here…"
+                  value={apiKey} onChange={e => setApiKey(e.target.value)}
+                  onKeyDown={e => e.key==='Enter' && connect()} autoComplete="off" />
+              </div>
+
+              {error && (
+                <div style={{ padding:'12px 14px', borderRadius:8, background:'var(--red-bg)', border:'1px solid var(--red-border)', fontSize:13, color:'var(--red)', lineHeight:1.5 }}>
+                  {error}
+                </div>
+              )}
+
+              {company && (
+                <div style={{ padding:'14px 16px', borderRadius:10, background:'var(--green-bg)', border:'1.5px solid var(--green-border)' }}>
+                  <div style={{ fontSize:11, fontWeight:700, color:'var(--green)', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.05em' }}>✓ Connected successfully</div>
+                  <div style={{ fontSize:18, fontWeight:700, letterSpacing:'-0.02em', color:'var(--text)' }}>{company.name}</div>
+                  <div style={{ fontSize:12, color:'var(--text-2)', marginTop:3 }}>
+                    Company ID: <strong>{company.id}</strong> &nbsp;·&nbsp; Region: <strong>{company.region}</strong>
+                  </div>
+                </div>
+              )}
+
+              <div style={{ display:'flex', gap:10 }}>
+                <button className="btn btn-primary" onClick={connect} disabled={loading || !apiKey.trim()} style={{ flex: company ? 'unset' : 1 }}>
+                  {loading ? 'Connecting…' : 'Connect'}
+                </button>
+                {company && (
+                  <button className="btn btn-primary" onClick={() => onNext(company)} style={{ flex:1 }}>
+                    Continue: Select Brands →
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Endpoint / CORS info */}
+          <div style={{ marginTop:'1.25rem', padding:'12px 14px', borderRadius:8, background:'var(--bg-2)', border:'1px solid var(--border)' }}>
+            <div className="label" style={{ marginBottom:5 }}>Endpoint</div>
+            <code className="mono" style={{ fontSize:12, color:'var(--text-2)' }}>{apiBase}</code>
+            <div style={{ fontSize:11, color:'var(--text-3)', marginTop:5 }}>
+              {proxyBase.trim()
+                ? 'Routed through your Netlify proxy → no CORS issues'
+                : 'Calling Zuper directly — if CORS errors appear, use Advanced Settings below'}
+            </div>
+          </div>
+
+          {/* Advanced settings */}
+          <div style={{ marginTop:'1rem' }}>
+            <button className="btn btn-outline btn-sm" style={{ width:'100%', justifyContent:'space-between', display:'flex' }}
+              onClick={() => setShowAdv(v => !v)}>
+              <span>⚙ Advanced Settings</span>
+              <span style={{ color:'var(--text-3)' }}>{showAdv ? '▲' : '▼'}</span>
+            </button>
+
+            {showAdv && (
+              <div style={{ marginTop:8, padding:'14px', borderRadius:8, background:'var(--bg-2)', border:'1px solid var(--border)' }}>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--text)', marginBottom:4 }}>Netlify proxy URL (optional)</div>
+                <div style={{ fontSize:12, color:'var(--text-3)', marginBottom:8, lineHeight:1.5 }}>
+                  If direct Zuper calls fail with a CORS error, deploy the included <code style={{ fontFamily:'var(--mono)', fontSize:11 }}>netlify/functions/zuper-proxy.js</code> and paste the deployment URL here.<br />
+                  Example: <code style={{ fontFamily:'var(--mono)', fontSize:11 }}>https://my-zuper-import.netlify.app</code>
+                </div>
+                <input className="input" placeholder="https://your-netlify-deploy.netlify.app"
+                  value={proxyBase} onChange={e => setProxyBase(e.target.value)} style={{ fontSize:12 }} />
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 2 — BRANDS
+    // ═══════════════════════════════════════════════════════════════
+
+    const CAT_COLORS = [
+      { kw:'shin',  color:'#4f58f0', bg:'#eef0ff' }, { kw:'vent',   color:'#059669', bg:'#ecfdf5' },
+      { kw:'gutter',color:'#0284c7', bg:'#e0f2fe' }, { kw:'under',  color:'#7c3aed', bg:'#f5f3ff' },
+      { kw:'flash', color:'#b45309', bg:'#fef3c7' }, { kw:'nail',   color:'#dc2626', bg:'#fef2f2' },
+      { kw:'ice',   color:'#0891b2', bg:'#ecfeff' }, { kw:'drip',   color:'#6d28d9', bg:'#ede9fe' },
+      { kw:'ridge', color:'#d97706', bg:'#fffbeb' }, { kw:'sidin',  color:'#166534', bg:'#f0fdf4' },
+      { kw:'deck',  color:'#92400e', bg:'#fef3c7' }, { kw:'start',  color:'#1d4ed8', bg:'#eff6ff' },
+    ];
+    function catStyle(name) {
+      const n = name.toLowerCase();
+      const m = CAT_COLORS.find(c => n.includes(c.kw));
+      return m ? { color:m.color, bg:m.bg } : { color:'#374151', bg:'#f3f4f6' };
+    }
+    function safeCatName(c) {
+      if (!c) return '';
+      if (typeof c === 'string') return c;
+      return String(c.category_name || c.name || c.label || c.title || Object.values(c).find(v => typeof v==='string' && v.length>0) || '');
+    }
+
+    function StepBrands({ conn, onNext, onBack }) {
+      const [search,      setSearch]      = useState('');
+      const [selected,    setSelected]    = useState(new Set());
+      const [zuperCats,   setZuperCats]   = useState([]);
+      const [loadingCats, setLoadingCats] = useState(true);
+      const [showAllCats, setShowAllCats] = useState(false);
+
+      useEffect(() => {
+        if (!conn) return;
+        createZuperClient(conn.region, conn.apiKey, conn.proxyBase)
+          .getAllProductCategories()
+          .then(cats => {
+            const safe = (Array.isArray(cats) ? cats : []).map(c => { const n = safeCatName(c); return n ? { _name:n, _raw:c } : null; }).filter(Boolean);
+            setZuperCats(safe);
+          })
+          .catch(() => setZuperCats([]))
+          .finally(() => setLoadingCats(false));
+      }, []);
+
+      const filtered = useMemo(() => ALL_BRANDS.filter(b => b.toLowerCase().includes(search.toLowerCase())), [search]);
+      const toggle    = b => { const s = new Set(selected); s.has(b) ? s.delete(b) : s.add(b); setSelected(s); };
+      const selectAll = () => setSelected(new Set(filtered));
+      const clearAll  = () => setSelected(new Set());
+      const visibleCats = showAllCats ? zuperCats : zuperCats.slice(0,12);
+
+      return (
+        <div className="page">
+          <div style={{ marginBottom:'1.5rem' }}>
+            <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:'-0.02em', marginBottom:6, color:'var(--text)' }}>Select brands to import</h1>
+            <p style={{ fontSize:14, color:'var(--text-2)', lineHeight:1.6 }}>Choose manufacturer brands to bring into Zuper. Search and click tiles to select — your selections persist as you search.</p>
+          </div>
+
+          <div className="card" style={{ marginBottom:'1.5rem' }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14 }}>
+              <div>
+                <div style={{ fontWeight:700, fontSize:15, color:'var(--text)', marginBottom:2 }}>
+                  Zuper product categories
+                  {!loadingCats && <span style={{ fontSize:13, fontWeight:400, color:'var(--text-3)', marginLeft:8 }}>({zuperCats.length} found in your account)</span>}
+                </div>
+                <div style={{ fontSize:12, color:'var(--text-3)' }}>These are the existing categories in your Zuper account that products will be mapped to</div>
+              </div>
+            </div>
+            {loadingCats ? (
+              <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                {[1,2,3,4,5,6].map(i => <div key={i} className="shimmer" style={{ height:32, width:120, borderRadius:6, background:'var(--bg-3)' }} />)}
+              </div>
+            ) : zuperCats.length === 0 ? (
+              <div style={{ fontSize:13, color:'var(--text-3)', padding:'8px 0' }}>No product categories found in your Zuper account yet</div>
+            ) : (
+              <>
+                <div style={{ display:'flex', gap:8, flexWrap:'wrap' }}>
+                  {visibleCats.map((c,i) => {
+                    const n = c._name;
+                    const { color, bg } = catStyle(n);
+                    return (
+                      <div key={i} style={{ padding:'5px 12px', borderRadius:6, background:bg, border:`1px solid ${color}22`, display:'flex', alignItems:'center', gap:6 }}>
+                        <div style={{ width:6, height:6, borderRadius:'50%', background:color, flexShrink:0 }} />
+                        <span style={{ fontSize:12, fontWeight:500, color }}>{n}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+                {zuperCats.length > 12 && (
+                  <button className="btn btn-outline btn-sm" style={{ marginTop:10 }} onClick={() => setShowAllCats(v => !v)}>
+                    {showAllCats ? 'Show fewer' : `Show all ${zuperCats.length} categories`}
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 290px', gap:'1.5rem', alignItems:'start' }}>
+            <div className="card">
+              <div style={{ display:'flex', gap:8, marginBottom:'1.25rem', alignItems:'center' }}>
+                <input className="input" placeholder="Search brands…" value={search} onChange={e => setSearch(e.target.value)} style={{ flex:1 }} />
+                <button className="btn btn-outline btn-sm" onClick={selectAll}>Select all</button>
+                <button className="btn btn-outline btn-sm" onClick={clearAll}>Clear</button>
+              </div>
+              {filtered.length === 0 ? (
+                <div style={{ padding:'3rem', textAlign:'center', color:'var(--text-3)', fontSize:14 }}>No brands match "{search}"</div>
+              ) : (
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(138px, 1fr))', gap:10 }}>
+                  {filtered.map(brand => {
+                    const isSel = selected.has(brand);
+                    const isBig = BIG3.includes(brand);
+                    return (
+                      <div key={brand} onClick={() => toggle(brand)} style={{ padding:'14px 12px', borderRadius:12, cursor:'pointer', border: isSel ? '2px solid var(--accent)' : '1.5px solid var(--border-2)', background: isSel ? 'var(--accent-light)' : 'var(--bg-2)', transition:'all 0.15s', position:'relative', userSelect:'none', boxShadow: isSel ? '0 2px 8px rgba(79,88,240,0.15)' : 'var(--shadow-sm)' }}>
+                        {isBig && <span className="badge badge-amber" style={{ position:'absolute', top:8, right:8, fontSize:9, padding:'1px 5px' }}>Big 3</span>}
+                        {isSel && <div style={{ position:'absolute', top:8, left:8, width:16, height:16, borderRadius:'50%', background:'var(--accent)', display:'flex', alignItems:'center', justifyContent:'center', color:'#fff', fontSize:9, fontWeight:700 }}>✓</div>}
+                        <div style={{ width:36, height:36, borderRadius:8, marginBottom:10, background: isSel ? 'rgba(79,88,240,0.15)' : 'var(--bg-4)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:13, fontWeight:700, fontFamily:'var(--mono)', color: isSel ? 'var(--accent)' : 'var(--text-3)' }}>{brand.substring(0,2).toUpperCase()}</div>
+                        <div style={{ fontSize:12, lineHeight:1.35, fontWeight: isSel ? 600 : 500, color: isSel ? 'var(--accent)' : 'var(--text)' }}>{brand}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <div className="card">
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 }}>
+                  <span style={{ fontSize:14, fontWeight:600, color:'var(--text)' }}>Selected brands</span>
+                  {selected.size > 0 && <span className="badge badge-accent">{selected.size}</span>}
+                </div>
+                {selected.size === 0 ? (
+                  <div style={{ fontSize:13, color:'var(--text-3)', padding:'4px 0', lineHeight:1.5 }}>Click tiles on the left to select brands you want to import</div>
+                ) : (
+                  <div style={{ display:'flex', flexDirection:'column' }}>
+                    {[...selected].map(b => (
+                      <div key={b} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'7px 0', borderBottom:'1px solid var(--border)' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                          <div style={{ width:24, height:24, borderRadius:4, background:'var(--accent-light)', border:'1px solid var(--accent-border)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:9, fontWeight:700, fontFamily:'var(--mono)', color:'var(--accent)' }}>{b.substring(0,2).toUpperCase()}</div>
+                          <span style={{ fontSize:13, fontWeight:500, color:'var(--text)' }}>{b}</span>
+                        </div>
+                        <button onClick={() => toggle(b)} style={{ background:'none', border:'none', cursor:'pointer', color:'var(--text-3)', fontSize:18, lineHeight:1, padding:'0 2px' }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="btn btn-outline" onClick={onBack}>← Back</button>
+                <button className="btn btn-primary" disabled={selected.size===0}
+                  onClick={() => onNext([...selected], zuperCats.map(c => c._raw || c))}
+                  style={{ flex:1 }}>Continue ({selected.size}) →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 3 — TOKENS
+    // ═══════════════════════════════════════════════════════════════
+
+    function catNameFrom(c) {
+      if (!c) return '';
+      if (typeof c === 'string') return c;
+      return String(c.measurement_category_name || c.category_name || c.name || c.label || c.title || Object.values(c).find(v => typeof v==='string' && v.length>1) || '');
+    }
+    function catUidFrom(c) {
+      if (!c) return '';
+      if (typeof c === 'string') return c;
+      return String(c.measurement_category_uid || c.category_uid || c.uid || c.id || '');
+    }
+
+    function StepTokens({ conn, onNext, onBack }) {
+      const [zuperCats,   setZuperCats]   = useState([]);
+      const [loading,     setLoading]     = useState(true);
+      const [catMappings, setCatMappings] = useState({});
+      const [newCatName,  setNewCatName]  = useState('');
+      const [catStatus,   setCatStatus]   = useState({});
+      const [createdCats, setCreatedCats] = useState({});
+      const [debugLog,    setDebugLog]    = useState([]);
+      const [showDebug,   setShowDebug]   = useState(false);
+      const [rawResp,     setRawResp]     = useState('');
+
+      const requiredTokens = useMemo(() => {
+        const seen = new Map();
+        PROPOSAL_LINE_ITEMS.forEach(li => li.tokens_used.forEach(t => {
+          if (!seen.has(t)) {
+            const mt = MASTER_TOKENS.find(x => x.name===t);
+            seen.set(t, { name:t, category: mt?.category||'Roof Measurements', uom: mt?.uom||'' });
+          }
+        }));
+        return [...seen.values()];
+      }, []);
+
+      const grouped = useMemo(() => {
+        const g = {};
+        requiredTokens.forEach(t => { if (!g[t.category]) g[t.category]=[]; g[t.category].push(t); });
+        return g;
+      }, [requiredTokens]);
+
+      function addDebug(msg) { setDebugLog(prev => [{ time: new Date().toLocaleTimeString(), msg }, ...prev].slice(0,60)); }
+
+      useEffect(() => {
+        if (!conn) return;
+        createZuperClient(conn.region, conn.apiKey, conn.proxyBase)
+          .getMeasurementCategories()
+          .then(res => {
+            setRawResp(JSON.stringify(res,null,2).substring(0,4000));
+            let raw = res?.data ?? res;
+            if (!Array.isArray(raw)) raw = (typeof raw==='object' && raw) ? Object.values(raw) : [];
+            const safe = raw.filter(c => c!=null && catNameFrom(c));
+            setZuperCats(safe);
+            addDebug(`Loaded ${safe.length} measurement categories from Zuper`);
+            const autoMap = {};
+            requiredTokens.forEach(t => {
+              const tCat = t.category.toLowerCase();
+              const match = safe.find(c => { const n=catNameFrom(c).toLowerCase(); return n && (tCat.includes(n.substring(0,6)) || n.includes(tCat.substring(0,6))); });
+              if (match) { autoMap[t.name] = catUidFrom(match); addDebug(`Auto-mapped "${t.name}" → "${catNameFrom(match)}"`); }
+            });
+            setCatMappings(autoMap);
+          })
+          .catch(e => addDebug(`Error: ${e.message}`))
+          .finally(() => setLoading(false));
+      }, []);
+
+      async function createCategory(name) {
+        if (!name.trim()) return;
+        const client = createZuperClient(conn.region, conn.apiKey, conn.proxyBase);
+        setCatStatus(p => ({ ...p, [name]:'creating' }));
+        try {
+          const res = await client.createMeasurementCategory(name.trim());
+          addDebug(`Category create response: ${JSON.stringify(res).substring(0,200)}`);
+          const uid = String(res?.data?.measurement_category_uid || res?.data?.category_uid || res?.data?.uid || res?.data?.id || res?.measurement_category_uid || res?.uid || res?.id || '');
+          if (!uid) throw new Error(`No UID returned: ${JSON.stringify(res).substring(0,100)}`);
+          const newCat = { measurement_category_uid:uid, measurement_category_name:name.trim() };
+          setZuperCats(prev => [...prev, newCat]);
+          setCreatedCats(prev => ({ ...prev, [name]:uid }));
+          setCatStatus(p => ({ ...p, [name]:'done' }));
+          addDebug(`✓ Created category "${name}" → ${uid.substring(0,12)}…`);
+          return uid;
+        } catch (e) {
+          addDebug(`ERROR creating category "${name}": ${e.message}`);
+          setCatStatus(p => ({ ...p, [name]:'error' }));
+          return null;
+        }
+      }
+
+      const tokenUids = useMemo(() => {
+        const result = {};
+        requiredTokens.forEach(t => {
+          const uid = catMappings[t.name];
+          if (uid) {
+            const cat = zuperCats.find(c => catUidFrom(c) === uid);
+            result[t.name] = { token_uid:'', category_uid:uid, category_name: catNameFrom(cat) || t.category };
+          }
+        });
+        return result;
+      }, [catMappings, zuperCats, requiredTokens]);
+
+      const mappedCount    = Object.values(catMappings).filter(Boolean).length;
+      const allMapped      = mappedCount === requiredTokens.length;
+      const unmappedTokens = requiredTokens.filter(t => !catMappings[t.name]);
+
+      return (
+        <div className="page">
+          <div style={{ marginBottom:'1.5rem' }}>
+            <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:'-0.02em', marginBottom:6, color:'var(--text)' }}>Measurement token mapping</h1>
+            <p style={{ fontSize:14, color:'var(--text-2)', lineHeight:1.6 }}>Map each required measurement token to its Zuper category. Zuper's tokens are system-defined — you only need to confirm which <strong>category</strong> each belongs to.</p>
+          </div>
+
+          {!loading && (
+            <div style={{ padding:'12px 16px', borderRadius:10, marginBottom:'1rem', fontSize:13, background: allMapped ? 'var(--green-bg)' : 'var(--amber-bg)', border:`1px solid ${allMapped ? 'var(--green-border)' : 'var(--amber-border)'}`, display:'flex', alignItems:'center', gap:10 }}>
+              <span style={{ fontWeight:600, color: allMapped ? 'var(--green)' : 'var(--amber)' }}>
+                {allMapped ? `✓ All ${requiredTokens.length} tokens mapped` : `${mappedCount} of ${requiredTokens.length} tokens mapped`}
+              </span>
+              {!allMapped && <span style={{ color:'var(--text-2)' }}>{unmappedTokens.length} still need a category selected</span>}
+            </div>
+          )}
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 290px', gap:'1.5rem', alignItems:'start' }}>
+            <div className="card">
+              {loading ? (
+                <div className="shimmer" style={{ fontSize:13, color:'var(--text-2)', padding:'1rem 0' }}>Loading measurement categories from Zuper…</div>
+              ) : (
+                Object.entries(grouped).map(([masterCat, tokens]) => (
+                  <div key={masterCat} style={{ marginBottom:'2rem' }}>
+                    <div className="section-header">{masterCat}</div>
+                    <table className="table">
+                      <thead><tr><th style={{ width:'35%' }}>Token (system-defined)</th><th style={{ width:'10%' }}>UOM</th><th style={{ width:'40%' }}>Map to Zuper category</th><th style={{ width:'15%' }}>Status</th></tr></thead>
+                      <tbody>
+                        {tokens.map(t => {
+                          const mapped    = catMappings[t.name];
+                          return (
+                            <tr key={t.name} style={{ background: mapped ? 'rgba(5,150,105,0.025)' : 'transparent' }}>
+                              <td><div style={{ fontWeight:600, fontSize:13, color:'var(--text)' }}>{t.name}</div><div style={{ fontSize:10, color:'var(--text-3)', marginTop:2, fontStyle:'italic' }}>Zuper system token</div></td>
+                              <td><span className="tag">{t.uom}</span></td>
+                              <td>
+                                <select className="select" value={catMappings[t.name]||''} onChange={e => setCatMappings(p => ({ ...p, [t.name]:e.target.value }))}>
+                                  <option value="">— select category —</option>
+                                  {zuperCats.map((c,i) => { const n=catNameFrom(c); const u=catUidFrom(c); if (!n) return null; return <option key={u||i} value={u}>{n}</option>; })}
+                                </select>
+                              </td>
+                              <td>{mapped ? <span className="badge badge-green">✓ Mapped</span> : <span className="badge badge-amber">Unmapped</span>}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <div className="card">
+                <div style={{ fontWeight:700, fontSize:14, color:'var(--text)', marginBottom:8 }}>Create new category</div>
+                <p style={{ fontSize:12, color:'var(--text-2)', marginBottom:10, lineHeight:1.5 }}>If the category you need doesn't exist in Zuper yet, create it here. It will appear in the dropdowns above immediately.</p>
+                <input className="input" placeholder="e.g. Roof Measurements" value={newCatName} onChange={e => setNewCatName(e.target.value)}
+                  onKeyDown={e => e.key==='Enter' && newCatName.trim() && createCategory(newCatName).then(() => setNewCatName(''))} />
+                <button className="btn btn-primary" style={{ width:'100%', marginTop:8 }}
+                  disabled={!newCatName.trim() || catStatus[newCatName]==='creating'}
+                  onClick={() => createCategory(newCatName).then(uid => { if (uid) setNewCatName(''); })}>
+                  {catStatus[newCatName]==='creating' ? 'Creating…' : '+ Create category'}
+                </button>
+                {catStatus[newCatName]==='error' && <div style={{ fontSize:11, color:'var(--red)', marginTop:6 }}>Failed to create — check the debug log for details</div>}
+                {Object.keys(createdCats).length > 0 && (
+                  <div style={{ marginTop:12, borderTop:'1px solid var(--border)', paddingTop:10 }}>
+                    <div style={{ fontSize:11, fontWeight:600, color:'var(--text-3)', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.05em' }}>Created this session</div>
+                    {Object.entries(createdCats).map(([name,uid]) => (
+                      <div key={name} style={{ fontSize:12, display:'flex', justifyContent:'space-between', padding:'3px 0' }}>
+                        <span style={{ color:'var(--green)', fontWeight:500 }}>✓ {name}</span>
+                        <span className="mono" style={{ fontSize:10, color:'var(--text-3)' }}>{uid.substring(0,10)}…</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="card">
+                <div style={{ fontWeight:700, fontSize:14, color:'var(--text)', marginBottom:12 }}>Summary</div>
+                {[['Required tokens', requiredTokens.length, ''], ['Zuper categories', zuperCats.length, 'blue'], ['Mapped', mappedCount, 'green'], ['Unmapped', requiredTokens.length - mappedCount, requiredTokens.length - mappedCount > 0 ? 'amber' : 'gray']].map(([l,v,c]) => (
+                  <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0', borderBottom:'1px solid var(--border)', fontSize:13 }}>
+                    <span style={{ color:'var(--text-2)' }}>{l}</span>
+                    <span className={`badge badge-${c||'gray'}`}>{v}</span>
+                  </div>
+                ))}
+                <div style={{ margin:'14px 0 0' }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'var(--text-3)', marginBottom:5 }}><span>Progress</span><span>{mappedCount} / {requiredTokens.length}</span></div>
+                  <div className="progress-bar"><div className="progress-fill" style={{ width:`${requiredTokens.length > 0 ? (mappedCount/requiredTokens.length)*100 : 0}%` }} /></div>
+                </div>
+              </div>
+
+              <div style={{ padding:'12px 14px', borderRadius:10, background:'var(--blue-bg)', border:'1px solid var(--blue-border)' }}>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--blue)', marginBottom:5 }}>How this works</div>
+                <div style={{ fontSize:12, color:'var(--text-2)', lineHeight:1.6 }}>
+                  Zuper measurement tokens (Total Roof Area, etc.) are <strong>system-defined</strong> — they can't be created via API.<br /><br />
+                  You're only selecting which <strong>category</strong> each token lives under, so formulas can reference the correct category UID.
+                </div>
+              </div>
+
+              <div className="card card-sm">
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: showDebug ? 10 : 0 }}>
+                  <span style={{ fontWeight:600, fontSize:13 }}>Debug log ({debugLog.length})</span>
+                  <button className="btn btn-outline btn-xs" onClick={() => setShowDebug(v => !v)}>{showDebug ? 'Hide' : 'Show'}</button>
+                </div>
+                {showDebug && (
+                  <div style={{ maxHeight:260, overflowY:'auto' }}>
+                    {debugLog.map((e,i) => (
+                      <div key={i} style={{ padding:'3px 0', borderBottom:'1px solid var(--border)', fontSize:10, display:'flex', gap:6 }}>
+                        <span style={{ color:'var(--text-3)', fontFamily:'var(--mono)', flexShrink:0 }}>{e.time}</span>
+                        <span style={{ color: e.msg.startsWith('ERROR') ? 'var(--red)' : e.msg.startsWith('✓') ? 'var(--green)' : 'var(--text-2)', wordBreak:'break-all', fontFamily:'var(--mono)' }}>{e.msg}</span>
+                      </div>
+                    ))}
+                    {rawResp && (
+                      <div style={{ marginTop:8, borderTop:'1px solid var(--border)', paddingTop:8 }}>
+                        <div style={{ fontSize:10, fontWeight:600, color:'var(--text-3)', marginBottom:4 }}>Raw GET /measurements/categories:</div>
+                        <pre style={{ fontSize:9, color:'var(--text-2)', whiteSpace:'pre-wrap', wordBreak:'break-all', maxHeight:180, overflowY:'auto' }}>{rawResp}</pre>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="btn btn-outline" onClick={onBack}>← Back</button>
+                <button className="btn btn-primary" style={{ flex:1 }} onClick={() => onNext({ tokenUids, zuperCats, catMappings })}>Continue →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 4 — FORMULAS
+    // ═══════════════════════════════════════════════════════════════
+
+    function StepFormulas({ conn, brands, tokenData, onNext, onBack }) {
+      const [selected,  setSelected]  = useState(() => { const s={}; PROPOSAL_LINE_ITEMS.forEach(li => { s[li.name] = !!li.formula_expr; }); return s; });
+      const [overrides, setOverrides] = useState({});
+      const [creating,  setCreating]  = useState(false);
+      const [results,   setResults]   = useState({});
+      const [catFilter, setCatFilter] = useState('all');
+      const [log,       setLog]       = useState([]);
+      const [showLog,   setShowLog]   = useState(false);
+
+      const grouped = useMemo(() => { const g={}; PROPOSAL_LINE_ITEMS.forEach(li => { if (!g[li.srs_category]) g[li.srs_category]=[]; g[li.srs_category].push(li); }); return g; }, []);
+      const categories = Object.keys(grouped);
+
+      const getFormula = li => {
+        if (overrides[li.name]) return overrides[li.name];
+        if (li.relevant_formulas?.length > 0) return li.relevant_formulas[0];
+        if (li.formula_expr) return { name:li.name, expression:li.formula_expr, key:li.name.toLowerCase().replace(/[^a-z0-9]+/g,'_'), category:'AREA_MEASUREMENT', description:'' };
+        return null;
+      };
+
+      function toggleAll(items, val) { const s={...selected}; items.forEach(li => { s[li.name]=val; }); setSelected(s); }
+
+      const selCount     = Object.values(selected).filter(Boolean).length;
+      const createdCount = Object.values(results).filter(r => r.uid).length;
+      const errorCount   = Object.values(results).filter(r => r.error).length;
+
+      const filteredGroups = catFilter==='all' ? grouped : Object.fromEntries(Object.entries(grouped).filter(([k]) => k===catFilter));
+      const catLabel = c => c.replace(' AND ',' & ').replace('OTHER ','').replace('/ALUMINUM/COIL','');
+
+      async function createFormulas() {
+        setCreating(true);
+        const client     = createZuperClient(conn.region, conn.apiKey, conn.proxyBase);
+        const newResults = {};
+        const newLog     = [];
+        const todo       = PROPOSAL_LINE_ITEMS.filter(li => selected[li.name]);
+
+        for (const li of todo) {
+          const formula = getFormula(li);
+          if (!formula?.expression) {
+            newResults[li.name] = { skipped:true };
+            newLog.push(`⏭ ${li.name} — skipped (no formula expression)`);
+            continue;
+          }
+          const { expression, expression_map } = buildExpressionMap(formula.expression, tokenData?.tokenUids || {});
+          const payload = {
+            formula_name:        formula.name,
+            formula_key:         (formula.key || formula.name.toLowerCase().replace(/[^a-z0-9]+/g,'_')).substring(0,50),
+            formula_category:    formula.category || 'AREA_MEASUREMENT',
+            formula_description: formula.description || `Formula for ${li.name}`,
+            formula: { expression, expression_map, rounding_mechanism:'NEXT_WHOLE_NUMBER' },
+          };
+          try {
+            const res = await client.createFormula(payload);
+            const uid = String(res?.data?.formula_uid || res?.formula_uid || res?.data?.uid || res?.uid || `f-${Date.now()}`);
+            newResults[li.name] = { uid, formula };
+            newLog.push(`✓ ${li.name} → ${uid.substring(0,12)}…`);
+          } catch (e) {
+            const msg = String(e.message||e);
+            newResults[li.name] = { error:msg, formula };
+            newLog.push(`✗ ${li.name}: ${msg.substring(0,100)}`);
+          }
+        }
+        setResults(newResults); setLog(newLog); setShowLog(true); setCreating(false);
+      }
+
+      return (
+        <div className="page">
+          <div style={{ marginBottom:'1.5rem' }}>
+            <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:'-0.02em', marginBottom:6, color:'var(--text)' }}>Formula mapping</h1>
+            <p style={{ fontSize:14, color:'var(--text-2)', lineHeight:1.6 }}>Each <strong>line item</strong> below needs a formula in Zuper that calculates how much of that product is needed. Select the formula for each, then create them all at once.</p>
+            {brands?.length > 0 && (
+              <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:10, padding:'8px 14px', background:'var(--accent-light)', borderRadius:8, width:'fit-content' }}>
+                <span style={{ fontSize:12, color:'var(--accent)', fontWeight:600 }}>Brands selected:</span>
+                {brands.map(b => <span key={b} className="badge badge-accent" style={{ fontSize:11 }}>{b}</span>)}
+              </div>
+            )}
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 270px', gap:'1.5rem', alignItems:'start' }}>
+            <div>
+              <div style={{ display:'flex', gap:6, marginBottom:'1rem', flexWrap:'wrap' }}>
+                <button className={`pill${catFilter==='all'?' active':''}`} onClick={() => setCatFilter('all')}>All ({PROPOSAL_LINE_ITEMS.length})</button>
+                {categories.map(c => (
+                  <button key={c} className={`pill${catFilter===c?' active':''}`} onClick={() => setCatFilter(catFilter===c ? 'all' : c)} style={{ fontSize:11 }}>
+                    {catLabel(c)} ({grouped[c].length})
+                  </button>
+                ))}
+              </div>
+
+              <div className="card" style={{ padding:'10px 14px', marginBottom:'1rem', display:'flex', alignItems:'center', gap:12 }}>
+                <label style={{ display:'flex', alignItems:'center', gap:6, cursor:'pointer', fontSize:13 }}>
+                  <input type="checkbox" checked={selCount===PROPOSAL_LINE_ITEMS.length}
+                    onChange={e => { const s={}; PROPOSAL_LINE_ITEMS.forEach(li => s[li.name]=e.target.checked); setSelected(s); }} />
+                  <span style={{ color:'var(--text-2)' }}>Select all</span>
+                </label>
+                <span className="badge badge-accent">{selCount} selected</span>
+                {createdCount > 0 && <span className="badge badge-green">✓ {createdCount} created in Zuper</span>}
+                {errorCount > 0 && <span className="badge badge-red">{errorCount} errors</span>}
+              </div>
+
+              {Object.entries(filteredGroups).map(([cat, items]) => (
+                <div key={cat} className="card" style={{ marginBottom:'1rem' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:12, paddingBottom:10, borderBottom:'1px solid var(--border)' }}>
+                    <input type="checkbox" checked={items.every(i => selected[i.name])} onChange={e => toggleAll(items, e.target.checked)} />
+                    <div>
+                      <div style={{ fontWeight:700, fontSize:14, color:'var(--text)' }}>{catLabel(cat)}</div>
+                      <div style={{ fontSize:11, color:'var(--text-3)', marginTop:1 }}>{items.length} line item{items.length!==1?'s':''} · {items.filter(i => selected[i.name]).length} selected</div>
+                    </div>
+                  </div>
+
+                  {items.map((li, idx) => {
+                    const formula = getFormula(li);
+                    const result  = results[li.name];
+                    const isSel   = !!selected[li.name];
+                    const hasForm = !!formula?.expression;
+                    return (
+                      <div key={li.name} style={{ display:'grid', gridTemplateColumns:'20px 1fr', gap:12, padding:'12px 0', borderBottom: idx<items.length-1 ? '1px solid var(--border)' : 'none', opacity: isSel ? 1 : 0.45, transition:'opacity 0.15s' }}>
+                        <div style={{ paddingTop:3 }}>
+                          <input type="checkbox" checked={isSel} onChange={e => setSelected(p => ({ ...p, [li.name]:e.target.checked }))} />
+                        </div>
+                        <div>
+                          <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6, flexWrap:'wrap' }}>
+                            <span style={{ fontWeight:700, fontSize:14, color:'var(--text)' }}>{li.name}</span>
+                            <span className="tag">{li.output_uom}</span>
+                            {!hasForm && <span className="badge badge-gray">direct input</span>}
+                            {result?.uid     && <span className="badge badge-green">✓ Created in Zuper</span>}
+                            {result?.skipped && <span className="badge badge-gray">Skipped</span>}
+                            {result?.error   && <span className="badge badge-red" title={result.error}>Error</span>}
+                          </div>
+                          {li.tokens_used?.length > 0 && (
+                            <div style={{ display:'flex', gap:4, marginBottom:8, flexWrap:'wrap' }}>
+                              <span style={{ fontSize:11, color:'var(--text-3)', marginRight:2, alignSelf:'center' }}>uses:</span>
+                              {li.tokens_used.map(t => <span key={t} className="token-chip">{t}</span>)}
+                            </div>
+                          )}
+                          {hasForm ? (
+                            <div style={{ background:'var(--bg-3)', borderRadius:8, padding:'10px 12px' }}>
+                              {li.relevant_formulas?.length > 1 && (
+                                <div style={{ marginBottom:8 }}>
+                                  <label style={{ fontSize:11, color:'var(--text-3)', display:'block', marginBottom:4 }}>Formula ({li.relevant_formulas.length} options available)</label>
+                                  <select className="select" value={formula?.name||''} onChange={e => { const f=li.relevant_formulas.find(x => x.name===e.target.value); if (f) setOverrides(p => ({ ...p, [li.name]:f })); }}>
+                                    {li.relevant_formulas.map(f => <option key={f.key} value={f.name}>{f.name}</option>)}
+                                  </select>
+                                </div>
+                              )}
+                              <div>
+                                <label style={{ fontSize:11, color:'var(--text-3)', display:'block', marginBottom:3 }}>Expression</label>
+                                <div className="mono" style={{ fontSize:12, color:'var(--text)', lineHeight:1.5, wordBreak:'break-all' }}>{formula?.expression||'—'}</div>
+                              </div>
+                              {result?.error && <div style={{ marginTop:8, padding:'6px 10px', background:'var(--red-bg)', borderRadius:6, fontSize:11, color:'var(--red)', lineHeight:1.5, wordBreak:'break-all' }}>{result.error.substring(0,200)}</div>}
+                            </div>
+                          ) : (
+                            <div style={{ fontSize:12, color:'var(--text-3)', fontStyle:'italic', padding:'6px 0' }}>This line item is entered manually on each job — no formula needed.</div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <div className="card">
+                <div style={{ fontWeight:700, fontSize:14, color:'var(--text)', marginBottom:12 }}>Formula creation</div>
+                {[['Total line items', PROPOSAL_LINE_ITEMS.length,''], ['Selected', selCount,'accent'], ['With formula', PROPOSAL_LINE_ITEMS.filter(li => selected[li.name] && getFormula(li)?.expression).length,'green'], ['Direct input', PROPOSAL_LINE_ITEMS.filter(li => selected[li.name] && !getFormula(li)?.expression).length,'gray'], ['Created ✓', createdCount,'blue'], ['Errors', errorCount, errorCount>0?'red':'gray']].map(([l,v,c]) => (
+                  <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0', borderBottom:'1px solid var(--border)', fontSize:13 }}>
+                    <span style={{ color:'var(--text-2)' }}>{l}</span>
+                    <span className={`badge badge-${c||'gray'}`}>{v}</span>
+                  </div>
+                ))}
+                <button className="btn btn-primary" style={{ width:'100%', marginTop:14 }} disabled={creating||selCount===0} onClick={createFormulas}>
+                  {creating ? 'Creating formulas…' : `Create ${selCount} formula${selCount!==1?'s':''} in Zuper`}
+                </button>
+              </div>
+
+              <div style={{ padding:'12px 14px', borderRadius:10, background:'var(--blue-bg)', border:'1px solid var(--blue-border)' }}>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--blue)', marginBottom:6 }}>What happens</div>
+                <div style={{ fontSize:12, color:'var(--text-2)', lineHeight:1.7 }}>
+                  Each selected line item creates a formula in Zuper via <span className="mono" style={{ fontSize:11 }}>POST /formulas</span>.<br /><br />
+                  The formula's <strong>expression</strong> uses measurement token UIDs so Zuper can calculate quantities from job measurements automatically.
+                </div>
+              </div>
+
+              {log.length > 0 && (
+                <div className="card card-sm">
+                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom: showLog ? 10 : 0 }}>
+                    <span style={{ fontWeight:600, fontSize:13 }}>Log ({log.length})</span>
+                    <button className="btn btn-outline btn-xs" onClick={() => setShowLog(v => !v)}>{showLog ? 'Hide' : 'Show'}</button>
+                  </div>
+                  {showLog && (
+                    <div style={{ maxHeight:240, overflowY:'auto' }}>
+                      {log.map((l,i) => (
+                        <div key={i} style={{ fontSize:11, fontFamily:'var(--mono)', padding:'4px 0', borderBottom:'1px solid var(--border)', color: l.startsWith('✓') ? 'var(--green)' : l.startsWith('✗') ? 'var(--red)' : 'var(--text-3)', wordBreak:'break-all', lineHeight:1.5 }}>{l}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="btn btn-outline" onClick={onBack}>← Back</button>
+                <button className="btn btn-primary" style={{ flex:1 }} onClick={() => onNext(results)}>{createdCount > 0 ? 'Continue →' : 'Skip →'}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 5 — PRODUCTS
+    // ═══════════════════════════════════════════════════════════════
+
+    function prodName(p) { return String(p?.product_name || p?.name || p?.title || ''); }
+    function prodId(p)   { return String(p?.product_id   || p?.id   || ''); }
+
+    function StepProducts({ conn, brands, formulaResults, onNext, onBack }) {
+      const [activeBrand,   setActiveBrand]   = useState(brands[0] || '');
+      const [zuperProds,    setZuperProds]    = useState([]);
+      const [supaProds,     setSupaProds]     = useState([]);
+      const [loading,       setLoading]       = useState(false);
+      const [locationUid,   setLocationUid]   = useState('');
+      const [locationName,  setLocationName]  = useState('');
+      const [locationError, setLocationError] = useState('');
+      const [mappings,      setMappings]      = useState({});
+      const [creating,      setCreating]      = useState({});
+      const [created,       setCreated]       = useState({});
+      const [expanded,      setExpanded]      = useState(new Set());
+      const [log,           setLog]           = useState([]);
+
+      // ── Resolve warehouse location once on mount ───────────────────────────
+      useEffect(() => {
+        if (!conn) return;
+        const client = createZuperClient(conn.region, conn.apiKey, conn.proxyBase);
+        getOrCreateWarehouse(client)
+          .then(({ uid, name }) => {           // ← BUG FIX: destructure properly
+            setLocationUid(uid);
+            setLocationName(name || 'Warehouse');
+          })
+          .catch(e => setLocationError(String(e.message || e)));
+      }, []);
+
+      // ── Load products when brand changes ──────────────────────────────────
+      useEffect(() => {
+        if (!activeBrand || !conn) return;
+        let cancelled = false;
+        async function load() {
+          setLoading(true); setSupaProds([]); setMappings({});
+          const client = createZuperClient(conn.region, conn.apiKey, conn.proxyBase);
+          const [zp, sp] = await Promise.all([
+            client.getProducts().catch(() => []),
+            fetchProductsByBrand(activeBrand).catch(() => []),
+          ]);
+          if (cancelled) return;
+          const zpSafe = (Array.isArray(zp) ? zp : []).filter(p => p && typeof p==='object');
+          const spSafe = (Array.isArray(sp) ? sp : []).filter(p => p && typeof p==='object');
+          setZuperProds(zpSafe); setSupaProds(spSafe);
+          const auto = {};
+          spSafe.forEach(p => {
+            const pName = (p.product_name||'').toLowerCase();
+            const match = pName.length > 6 ? zpSafe.find(z => prodName(z).toLowerCase().includes(pName.substring(0,10))) : null;
+            auto[p.product_id] = match ? { action:'map', zuper_prod:match } : { action:'create' };
+          });
+          setMappings(auto); setLoading(false);
+        }
+        load();
+        return () => { cancelled = true; };
+      }, [activeBrand, conn]);
+
+      async function createProduct(p) {
+        if (!locationUid) { setLog(prev => [...prev, `✗ No location UID available — resolve location first`]); return; }
+        const client = createZuperClient(conn.region, conn.apiKey, conn.proxyBase);
+        setCreating(prev => ({ ...prev, [p.product_id]:true }));
+        try {
+          const res = await client.createProduct({
+            product: {
+              product_name:     String(p.product_name||''),
+              product_category: String(p.product_category||''),
+              product_id:       String(p.product_id),
+              price:            parseFloat(p.suggested_price||0),
+              location_availability: [{ location: locationUid, quantity:100, min_quantity:1 }],
+            },
+          });
+          const newId = String(res?.data?.product_id || res?.data?.uid || res?.data?.id || res?.product_id || p.product_id);
+          const li      = PROPOSAL_LINE_ITEMS.find(x => x.srs_category===p.product_category);
+          const fResult = li ? (formulaResults||{})[li.name] : null;
+          if (fResult?.uid && newId && newId !== String(p.product_id)) {
+            await client.linkFormulaToProduct(newId, fResult.uid).catch(() => {});
+          }
+          setCreated(prev => ({ ...prev, [p.product_id]: { zuper_id:newId, formula_linked:!!fResult?.uid } }));
+          setLog(prev => [...prev, `✓ "${p.product_name}" — $${parseFloat(p.suggested_price||0).toFixed(2)}`]);
+        } catch (e) {
+          const msg = String(e.message||e);
+          setCreated(prev => ({ ...prev, [p.product_id]: { error:msg } }));
+          setLog(prev => [...prev, `✗ "${p.product_name}": ${msg.substring(0,100)}`]);
+        }
+        setCreating(prev => ({ ...prev, [p.product_id]:false }));
+      }
+
+      async function createAllPending() {
+        const pending = supaProds.filter(p => mappings[p.product_id]?.action==='create' && !created[p.product_id]);
+        for (const p of pending) await createProduct(p);
+      }
+
+      const grouped = useMemo(() => { const g={}; supaProds.forEach(p => { const cat=String(p.product_category||'Other'); if (!g[cat]) g[cat]=[]; g[cat].push(p); }); return g; }, [supaProds]);
+
+      const pendingCount = supaProds.filter(p => mappings[p.product_id]?.action==='create' && !created[p.product_id]).length;
+      const mappedCount  = supaProds.filter(p => mappings[p.product_id]?.action==='map').length;
+      const createdCount = Object.values(created).filter(v => v && !v.error).length;
+      const errorCount   = Object.values(created).filter(v => v?.error).length;
+
+      return (
+        <div className="page">
+          <div style={{ marginBottom:'1.5rem' }}>
+            <h1 style={{ fontSize:22, fontWeight:700, letterSpacing:'-0.02em', marginBottom:6, color:'var(--text)' }}>Product mapping</h1>
+            <p style={{ fontSize:14, color:'var(--text-2)', lineHeight:1.6 }}>Match SRS catalog products with your Zuper product library. Unmapped products will be created using SRS suggested pricing with formula linked automatically.</p>
+          </div>
+
+          {locationError ? (
+            <div style={{ padding:'14px 18px', borderRadius:10, background:'var(--red-bg)', border:'1px solid var(--red-border)', marginBottom:'1rem' }}>
+              <div style={{ fontWeight:700, color:'var(--red)', fontSize:14, marginBottom:6 }}>⚠ Location error — action required</div>
+              <p style={{ fontSize:13, color:'var(--text)', lineHeight:1.6, marginBottom:10 }}>Zuper requires at least one inventory location before products can be created. Please add one manually:</p>
+              <ol style={{ fontSize:13, color:'var(--text-2)', lineHeight:2, paddingLeft:20 }}>
+                <li>Log in to your Zuper account</li>
+                <li>Go to <strong style={{ color:'var(--text)' }}>Settings → Locations → Add Location</strong></li>
+                <li>Create a location named <strong style={{ color:'var(--text)' }}>Warehouse</strong> (type: Warehouse)</li>
+                <li>Come back here and reload the page</li>
+              </ol>
+              <div style={{ marginTop:10, padding:'8px 12px', background:'rgba(220,38,38,0.06)', borderRadius:6, fontFamily:'var(--mono)', fontSize:11, color:'var(--red)', wordBreak:'break-all' }}>API error: {locationError}</div>
+            </div>
+          ) : locationUid ? (
+            <div style={{ padding:'10px 16px', borderRadius:10, background:'var(--green-bg)', border:'1px solid var(--green-border)', marginBottom:'1rem', display:'flex', alignItems:'center', gap:10, fontSize:13 }}>
+              <span style={{ color:'var(--green)', fontWeight:600 }}>✓ Location resolved</span>
+              <span style={{ color:'var(--text-2)' }}>Products will be assigned to <strong style={{ color:'var(--text)' }}>{locationName}</strong> (uid: {locationUid.substring(0,12)}…)</span>
+            </div>
+          ) : (
+            <div style={{ padding:'10px 16px', borderRadius:10, background:'var(--amber-bg)', border:'1px solid var(--amber-border)', marginBottom:'1rem', fontSize:13 }}>
+              <span className="shimmer" style={{ color:'var(--amber)' }}>Resolving warehouse location…</span>
+            </div>
+          )}
+
+          <div style={{ display:'flex', gap:6, marginBottom:'1rem', flexWrap:'wrap' }}>
+            {brands.map(b => (
+              <button key={b} className={`pill${activeBrand===b?' active':''}`} onClick={() => setActiveBrand(b)}>{b}</button>
+            ))}
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 280px', gap:'1.5rem', alignItems:'start' }}>
+            <div className="card">
+              {loading ? (
+                <div className="shimmer" style={{ fontSize:13, color:'var(--text-2)', padding:'1rem 0' }}>Loading products for {activeBrand}…</div>
+              ) : supaProds.length === 0 ? (
+                <div style={{ padding:'2rem', textAlign:'center', color:'var(--text-3)', fontSize:14 }}>No products found for <strong>{activeBrand}</strong> in the SRS catalog</div>
+              ) : (
+                <>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+                    <span style={{ fontSize:13, color:'var(--text-2)' }}><strong style={{ color:'var(--text)' }}>{supaProds.length}</strong> SRS products</span>
+                    <span style={{ fontSize:13, color:'var(--text-2)' }}><strong style={{ color:'var(--text)' }}>{zuperProds.length}</strong> already in Zuper</span>
+                  </div>
+
+                  {Object.entries(grouped).map(([cat, prods]) => {
+                    const li         = PROPOSAL_LINE_ITEMS.find(x => x.srs_category===cat);
+                    const hasFormula = li && (formulaResults||{})[li.name] && !(formulaResults||{})[li.name]?.skipped;
+                    const isExpanded = expanded.has(cat);
+                    const shown      = isExpanded ? prods : prods.slice(0,4);
+                    return (
+                      <div key={cat} style={{ marginBottom:'2rem' }}>
+                        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:8 }}>
+                          <span className="section-header" style={{ marginBottom:0, paddingBottom:0, border:'none', fontSize:11, fontWeight:700 }}>{cat.replace(' AND ',' & ')}</span>
+                          <span style={{ fontSize:11, color:'var(--text-3)' }}>{prods.length} products</span>
+                          {hasFormula && <span className="badge badge-accent">formula linked</span>}
+                        </div>
+                        <table className="table">
+                          <thead><tr><th style={{ width:'38%' }}>Product</th><th style={{ width:'12%' }}>Price</th><th style={{ width:'32%' }}>Map to existing Zuper product</th><th style={{ width:'18%' }}>Action</th></tr></thead>
+                          <tbody>
+                            {shown.map(p => {
+                              const m          = mappings[p.product_id] || { action:'create' };
+                              const isDone     = created[p.product_id];
+                              const isCreating = creating[p.product_id];
+                              const selVal     = m.zuper_prod ? (prodId(m.zuper_prod)||'') : '';
+                              return (
+                                <tr key={p.product_id}>
+                                  <td>
+                                    <div style={{ fontSize:12, fontWeight:600, lineHeight:1.35, color:'var(--text)' }}>{String(p.product_name||'')}</div>
+                                    <div style={{ fontSize:10, color:'var(--text-3)', marginTop:2 }}>{String(p.manufacturer_norm||'')}{p.family_tier ? ` · ${p.family_tier}` : ''}</div>
+                                  </td>
+                                  <td><span style={{ fontFamily:'var(--mono)', fontSize:12, fontWeight:500 }}>{p.suggested_price ? `$${parseFloat(p.suggested_price).toFixed(2)}` : '—'}</span></td>
+                                  <td>
+                                    <select className="select" value={selVal} onChange={e => { const found=zuperProds.find(z => prodId(z)===e.target.value); setMappings(prev => ({ ...prev, [p.product_id]: found ? { action:'map', zuper_prod:found } : { action:'create', zuper_prod:null } })); }}>
+                                      <option value="">— create new product —</option>
+                                      {zuperProds.map((z,i) => { const n=prodName(z); const u=prodId(z); if (!n) return null; return <option key={u||i} value={u}>{n}</option>; })}
+                                    </select>
+                                  </td>
+                                  <td>
+                                    {isDone && !isDone.error ? (
+                                      <div style={{ display:'flex', flexDirection:'column', gap:3 }}>
+                                        <span className="badge badge-green">✓ Created</span>
+                                        {isDone.formula_linked && <span className="badge badge-accent" style={{ fontSize:9 }}>formula linked</span>}
+                                      </div>
+                                    ) : isDone?.error ? (
+                                      <div>
+                                        <span className="badge badge-red">Error</span>
+                                        <div style={{ fontSize:9, color:'var(--red)', marginTop:2, maxWidth:140, wordBreak:'break-word', lineHeight:1.3 }}>{isDone.error.substring(0,80)}</div>
+                                      </div>
+                                    ) : m.action==='map' ? (
+                                      <span className="badge badge-blue">Mapped</span>
+                                    ) : (
+                                      <button className="btn btn-primary btn-xs" onClick={() => createProduct(p)} disabled={isCreating || !locationUid} title={!locationUid ? 'Waiting for location…' : ''}>
+                                        {isCreating ? '…' : 'Create'}
+                                      </button>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                        {prods.length > 4 && (
+                          <button className="btn btn-outline btn-xs" style={{ marginTop:8 }} onClick={() => { const s=new Set(expanded); s.has(cat) ? s.delete(cat) : s.add(cat); setExpanded(s); }}>
+                            {expanded.has(cat) ? 'Show fewer ↑' : `Show all ${prods.length} ↓`}
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+            </div>
+
+            <div style={{ display:'flex', flexDirection:'column', gap:12 }}>
+              <div className="card card-sm">
+                <div style={{ fontWeight:600, fontSize:13, color:'var(--text)', marginBottom:8 }}>Inventory location</div>
+                {locationUid ? (
+                  <>
+                    <div style={{ fontSize:12, color:'var(--text-2)', marginBottom:4 }}><span className="badge badge-green" style={{ marginRight:6 }}>✓</span>{locationName}</div>
+                    <div className="mono" style={{ fontSize:10, color:'var(--text-3)' }}>{locationUid}</div>
+                  </>
+                ) : locationError ? (
+                  <div style={{ fontSize:12, color:'var(--red)' }}>⚠ {locationError.substring(0,80)}</div>
+                ) : (
+                  <div className="shimmer" style={{ fontSize:12, color:'var(--text-3)' }}>Resolving…</div>
+                )}
+              </div>
+
+              <div className="card">
+                <div style={{ fontWeight:700, fontSize:14, color:'var(--text)', marginBottom:12 }}>{activeBrand}</div>
+                {[['SRS products', supaProds.length,''], ['Auto-mapped', mappedCount,'blue'], ['To create', pendingCount,'amber'], ['Created', createdCount,'green'], ['Errors', errorCount, errorCount>0?'red':'']].map(([l,v,c]) => (
+                  <div key={l} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'5px 0', borderBottom:'1px solid var(--border)', fontSize:13 }}>
+                    <span style={{ color:'var(--text-2)' }}>{l}</span>
+                    {c ? <span className={`badge badge-${c}`}>{v}</span> : <span style={{ fontWeight:600, color:'var(--text)' }}>{v}</span>}
+                  </div>
+                ))}
+                {pendingCount > 0 && (
+                  <button className="btn btn-primary" style={{ width:'100%', marginTop:14 }} onClick={createAllPending} disabled={!locationUid} title={!locationUid ? 'Waiting for warehouse location…' : ''}>
+                    Create all {pendingCount} pending
+                  </button>
+                )}
+              </div>
+
+              {log.length > 0 && (
+                <div className="card card-sm" style={{ maxHeight:220, overflowY:'auto' }}>
+                  <div style={{ fontWeight:600, fontSize:11, color:'var(--text-3)', marginBottom:8, textTransform:'uppercase', letterSpacing:'0.05em' }}>Log</div>
+                  {log.map((l,i) => (
+                    <div key={i} style={{ fontSize:11, fontFamily:'var(--mono)', padding:'3px 0', borderBottom:'1px solid var(--border)', color: l.startsWith('✓') ? 'var(--green)' : 'var(--red)', wordBreak:'break-all', lineHeight:1.4 }}>{l}</div>
+                  ))}
+                </div>
+              )}
+
+              <div style={{ display:'flex', gap:8 }}>
+                <button className="btn btn-outline" onClick={onBack}>← Back</button>
+                <button className="btn btn-primary" style={{ flex:1 }} onClick={() => onNext({ mappings, created })}>Finish →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // STEP 6 — COMPLETE
+    // ═══════════════════════════════════════════════════════════════
+
+    function StepComplete({ conn, brands, formulaResults, productData, onRestart }) {
+      const formulaCount = Object.values(formulaResults||{}).filter(v => v && !v.skipped && !v.error).length;
+      const createdCount = Object.values(productData?.created||{}).filter(v => v && !v.error).length;
+      const mappedCount  = Object.values(productData?.mappings||{}).filter(m => m.action==='map').length;
+      const linkedCount  = Object.values(productData?.created||{}).filter(v => v?.formula_linked).length;
+
+      return (
+        <div style={{ maxWidth:620, margin:'3rem auto', padding:'0 1.5rem', textAlign:'center' }}>
+          <div style={{ width:80, height:80, margin:'0 auto 1.5rem', borderRadius:'50%', background:'var(--green-bg)', border:'2.5px solid var(--green-border)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:32, color:'var(--green)' }}>✓</div>
+          <h1 style={{ fontSize:28, fontWeight:700, letterSpacing:'-0.03em', marginBottom:10, color:'var(--text)' }}>Import complete</h1>
+          <p style={{ fontSize:15, color:'var(--text-2)', lineHeight:1.6, marginBottom:'2.5rem' }}>
+            The SRS catalog has been synced to <strong style={{ color:'var(--text)' }}>{conn?.name}</strong> on{' '}
+            <strong style={{ color:'var(--text)' }}>{conn?.region}</strong>
+            {brands?.length > 0 && <> for <strong style={{ color:'var(--text)' }}>{brands.join(', ')}</strong></>}.
+          </p>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(4, 1fr)', gap:12, marginBottom:'2rem' }}>
+            {[{ label:'Brands', value:brands?.length||0 }, { label:'Formulas', value:formulaCount }, { label:'Products', value:createdCount }, { label:'Formula links', value:linkedCount }].map(({ label, value }) => (
+              <div key={label} className="stat"><div className="stat-value">{value}</div><div className="stat-label">{label}</div></div>
+            ))}
+          </div>
+
+          <div className="card" style={{ textAlign:'left', marginBottom:'2rem' }}>
+            {[
+              `Connected to ${conn?.name} (${conn?.id}) on ${conn?.region}`,
+              `Brands imported: ${brands?.join(', ')||'—'}`,
+              `Mapped measurement tokens to Zuper measurement categories`,
+              `Created ${formulaCount} formula${formulaCount!==1?'s':''} with full expression maps and token bindings`,
+              `Created ${createdCount} new product${createdCount!==1?'s':''} using SRS suggested pricing`,
+              `Mapped ${mappedCount} existing Zuper product${mappedCount!==1?'s':''}`,
+              `Linked ${linkedCount} formula${linkedCount!==1?'s':''} to corresponding product line items`,
+            ].map((item,i) => (
+              <div key={i} style={{ display:'flex', alignItems:'flex-start', gap:12, padding:'9px 0', borderBottom:'1px solid var(--border)', fontSize:13 }}>
+                <span style={{ color:'var(--green)', flexShrink:0, fontWeight:700, marginTop:1 }}>✓</span>
+                <span style={{ color:'var(--text-2)', lineHeight:1.5 }}>{item}</span>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display:'flex', gap:12, justifyContent:'center' }}>
+            <button className="btn btn-primary" onClick={onRestart} style={{ padding:'10px 28px' }}>Start new import</button>
+            {conn?.region && (
+              <a href={`https://${conn.region}.zuperpro.com`} target="_blank" rel="noopener noreferrer"
+                className="btn btn-outline" style={{ padding:'10px 28px', textDecoration:'none', display:'inline-flex', alignItems:'center' }}>
+                Open Zuper ↗
+              </a>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // APP
+    // ═══════════════════════════════════════════════════════════════
+
+    class ErrorBoundary extends Component {
+      constructor(props) { super(props); this.state = { error:null }; }
+      static getDerivedStateFromError(e) { return { error:e }; }
+      render() {
+        if (!this.state.error) return this.props.children;
+        return (
+          <div style={{ padding:'3rem 2rem', maxWidth:540, margin:'0 auto', textAlign:'center' }}>
+            <div style={{ fontSize:32, marginBottom:12 }}>⚠️</div>
+            <h2 style={{ fontSize:18, fontWeight:600, marginBottom:8, color:'#dc2626' }}>Something went wrong</h2>
+            <p style={{ fontSize:13, color:'#4b5368', marginBottom:20 }}>{this.state.error.message}</p>
+            <button onClick={() => { this.setState({ error:null }); this.props.onReset?.(); }}
+              style={{ padding:'9px 20px', borderRadius:8, background:'#4f58f0', color:'#fff', border:'none', cursor:'pointer', fontSize:13, fontWeight:500 }}>
+              Restart
+            </button>
+          </div>
+        );
+      }
+    }
+
+    const STEPS = [
+      { id:'connect',  label:'Connect' },
+      { id:'brands',   label:'Select brands' },
+      { id:'tokens',   label:'Token mapping' },
+      { id:'formulas', label:'Formula mapping' },
+      { id:'products', label:'Product mapping' },
+      { id:'complete', label:'Complete' },
+    ];
+
+    function App() {
+      const [step,           setStep]           = useState(0);
+      const [conn,           setConn]           = useState(null);
+      const [brands,         setBrands]         = useState([]);
+      const [zuperCats,      setZuperCats]      = useState([]);
+      const [tokenData,      setTokenData]      = useState(null);
+      const [formulaResults, setFormulaResults] = useState({});
+      const [productData,    setProductData]    = useState(null);
+
+      function restart() {
+        setStep(0); setConn(null); setBrands([]); setZuperCats([]);
+        setTokenData(null); setFormulaResults({}); setProductData(null);
+      }
+
+      return (
+        <div className="app">
+          <header className="header">
+            <div className="header-logo">
+              <div className="header-logo-mark">Z</div>
+              Zuper Catalog Import
+              {conn && (
+                <div className="header-company">
+                  <span style={{ color:'#d1d5db' }}>·</span>
+                  <span style={{ fontWeight:500 }}>{conn.name}</span>
+                  <span className="badge badge-accent" style={{ fontSize:10 }}>{conn.region}</span>
+                </div>
+              )}
+            </div>
+
+            <nav className="stepper">
+              {STEPS.map((s,i) => {
+                const isDone   = i < step;
+                const isActive = i === step;
+                return (
+                  <button key={s.id} className={`step-btn${isActive?' active':''}${isDone?' done':''}`}
+                    onClick={() => isDone && setStep(i)}
+                    title={isDone ? `Go back to ${s.label}` : undefined}>
+                    <span className={`step-num${isActive?' active':''}${isDone?' done':''}`}>{isDone ? '✓' : i+1}</span>
+                    {s.label}
+                  </button>
+                );
+              })}
+            </nav>
+          </header>
+
+          <main style={{ flex:1 }}>
+            <ErrorBoundary key={step} onReset={restart}>
+              {step===0 && <StepConnect onNext={c => { setConn(c); setStep(1); }} />}
+              {step===1 && <StepBrands conn={conn} onNext={(b,cats) => { setBrands(b); setZuperCats(cats||[]); setStep(2); }} onBack={() => setStep(0)} />}
+              {step===2 && <StepTokens conn={conn} brands={brands} onNext={d => { setTokenData(d); setStep(3); }} onBack={() => setStep(1)} />}
+              {step===3 && <StepFormulas conn={conn} brands={brands} tokenData={tokenData} onNext={r => { setFormulaResults(r); setStep(4); }} onBack={() => setStep(2)} />}
+              {step===4 && <StepProducts conn={conn} brands={brands} formulaResults={formulaResults} onNext={d => { setProductData(d); setStep(5); }} onBack={() => setStep(3)} />}
+              {step===5 && <StepComplete conn={conn} brands={brands} formulaResults={formulaResults} productData={productData} onRestart={restart} />}
+            </ErrorBoundary>
+          </main>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
 </html>
