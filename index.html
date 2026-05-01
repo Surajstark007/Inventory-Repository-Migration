@@ -254,24 +254,51 @@
      *   If provided, calls proxyBase + /api/zuper/{region}/...
      *   If omitted, calls Zuper directly at https://{region}.zuperpro.com/api
      */
+    // CORS proxy options (in priority order):
+    // 1. User-supplied proxy URL (e.g. their own Netlify deployment with function)
+    // 2. corsproxy.io — free public CORS proxy, forwards all headers including x-api-key
+    // Zuper's API does not send CORS headers so a proxy is required for browser-based calls.
+    const CORS_PROXY = 'https://corsproxy.io/?';
+
+    function makeProxiedUrl(targetUrl, proxyBase) {
+      if (proxyBase) {
+        // User has their own proxy deployment — route through it
+        // Expected format: POST {proxyBase}/api/zuper/{region}/{path}
+        return null; // handled separately
+      }
+      // Use corsproxy.io: wraps the full Zuper URL
+      return CORS_PROXY + encodeURIComponent(targetUrl);
+    }
+
     function createZuperClient(region, apiKey, proxyBase) {
-      const base = proxyBase
-        ? `${proxyBase.replace(/\/$/, '')}/api/zuper/${region}`
-        : `https://${region}.zuperpro.com/api`;
+      // If user supplied their own proxy base (e.g. their Netlify deployment),
+      // route through it. Otherwise call Zuper directly via corsproxy.io.
+      const ownProxyBase = proxyBase?.trim().replace(/\/$/, '');
+
+      function buildUrl(path) {
+        const zuper = `https://${region}.zuperpro.com/api${path}`;
+        if (ownProxyBase) {
+          return `${ownProxyBase}/api/zuper/${region}${path}`;
+        }
+        return CORS_PROXY + encodeURIComponent(zuper);
+      }
+
+      // Keep base for backwards compat
+      const base = ownProxyBase
+        ? `${ownProxyBase}/api/zuper/${region}`
+        : null; // unused when corsproxy.io is used
 
       async function request(method, path, body) {
+        const url = buildUrl(path);
         const opts = {
           method,
           headers: { accept:'application/json','content-type':'application/json','x-api-key':apiKey },
         };
         if (body !== undefined) opts.body = JSON.stringify(body);
         let res;
-        try { res = await fetch(`${base}${path}`, opts); }
+        try { res = await fetch(url, opts); }
         catch (e) {
-          if (e.message && (e.message.includes('Failed to fetch') || e.message.includes('NetworkError'))) {
-            throw new Error(`Network/CORS error — if calling Zuper directly fails due to CORS, enter your Netlify proxy URL in Advanced Settings. (${e.message})`);
-          }
-          throw new Error(`Network: ${e.message}`);
+          throw new Error(`Failed to fetch — check your internet connection. (${e.message})`);
         }
         const text = await res.text();
         if (!res.ok) {
@@ -496,9 +523,10 @@
         setLoading(false);
       }
 
+      const directUrl = `https://${region}.zuperpro.com/api/user/company`;
       const apiBase = proxyBase.trim()
         ? `${proxyBase.trim().replace(/\/$/,'')}/api/zuper/${region}/user/company`
-        : `https://${region}.zuperpro.com/api/user/company`;
+        : `corsproxy.io → ${directUrl}`;
 
       return (
         <div className="page-narrow">
@@ -563,8 +591,8 @@
             <code className="mono" style={{ fontSize:12, color:'var(--text-2)' }}>{apiBase}</code>
             <div style={{ fontSize:11, color:'var(--text-3)', marginTop:5 }}>
               {proxyBase.trim()
-                ? 'Routed through your Netlify proxy → no CORS issues'
-                : 'Calling Zuper directly — if CORS errors appear, use Advanced Settings below'}
+                ? 'Routed through your custom proxy → no CORS issues'
+                : 'Routed through corsproxy.io → CORS resolved automatically'}
             </div>
           </div>
 
@@ -578,12 +606,14 @@
 
             {showAdv && (
               <div style={{ marginTop:8, padding:'14px', borderRadius:8, background:'var(--bg-2)', border:'1px solid var(--border)' }}>
-                <div style={{ fontSize:12, fontWeight:600, color:'var(--text)', marginBottom:4 }}>Netlify proxy URL (optional)</div>
-                <div style={{ fontSize:12, color:'var(--text-3)', marginBottom:8, lineHeight:1.5 }}>
-                  If direct Zuper calls fail with a CORS error, deploy the included <code style={{ fontFamily:'var(--mono)', fontSize:11 }}>netlify/functions/zuper-proxy.js</code> and paste the deployment URL here.<br />
-                  Example: <code style={{ fontFamily:'var(--mono)', fontSize:11 }}>https://my-zuper-import.netlify.app</code>
+                <div style={{ fontSize:12, fontWeight:600, color:'var(--text)', marginBottom:4 }}>
+                  Custom proxy URL <span style={{ fontSize:11, color:'var(--text-3)', fontWeight:400 }}>(optional)</span>
                 </div>
-                <input className="input" placeholder="https://your-netlify-deploy.netlify.app"
+                <div style={{ fontSize:12, color:'var(--text-3)', marginBottom:8, lineHeight:1.5 }}>
+                  By default, API calls are routed through <code style={{ fontFamily:'var(--mono)', fontSize:11 }}>corsproxy.io</code> to bypass CORS.
+                  If you prefer your own proxy (e.g. a Netlify deployment with the proxy function), paste its URL here.
+                </div>
+                <input className="input" placeholder="https://your-own-proxy.netlify.app (leave blank to use corsproxy.io)"
                   value={proxyBase} onChange={e => setProxyBase(e.target.value)} style={{ fontSize:12 }} />
               </div>
             )}
