@@ -140,12 +140,20 @@
     });
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" crossorigin></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
   <!-- Babel removed: JSX pre-compiled server-side -->
   
 
   <script>
+// Wait for React to be available before running app
+(function initApp() {
+  if (typeof React === 'undefined' || typeof ReactDOM === 'undefined') {
+    // React not yet available - retry after a short delay
+    setTimeout(initApp, 50);
+    return;
+  }
+
 const {
   useState,
   useEffect,
@@ -3667,6 +3675,8 @@ var loadingEl = document.getElementById('loading-screen');
 if (loadingEl) loadingEl.style.display = 'none';
 ReactDOM.createRoot(document.getElementById('root')).render(/*#__PURE__*/React.createElement(App, null));
 
+
+})();
 </script>
 </body>
 </html>
